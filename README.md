@@ -1,38 +1,53 @@
 # Fiasco
 
-A non-blocking C++17 web framework inspired by FastAPI.
+A modern C++17 web framework that tries to bring [FastAPI](https://fastapi.tiangolo.com/) levels of ergonomics into C++ (see usage below)
 
 ## Usage
 
+### Compilation
+
+```shell
+git clone https://github.com/DarkiCraft/fiasco
+cd fiasco
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build
+
+# optional installation
+cmake --install build
+```
+
 ### Basic usage
 
-```cpp
+```c++
 fiasco::server app;
 
 app.get("/text", []() {
-    return fiasco::response::text("Hello, World!");
+    return "Hello, World!";
 });
 
+using fiasco::response::json;
 app.get("/json", []() {
-    return fiasco::response::json(R"({
+    return json(R"({
         "message": "Hello, World!",
     })");
 });
 
-app.run(8080); // runs on port 8080
+app.run(8080);
 ```
 
 ### Path parameters
 
 Path parameters are automatically extracted and assigned to function arguments left to right
 
-```cpp
+```c++
+using fiasco::response::json;
 app.post("/users/{user_id}/deposit/{amount}", [](int user_id, double amount) {
     // business logic
     // ...
     
-    return fiasco::response::json(R"({
-        "message": "ok",
+    return json(R"({
+        "message": "ok"
     })");
 });
 ```
@@ -40,10 +55,10 @@ Note that the names of the arguments in the handler do not matter as they are as
 
 ### Returning objects in the response body
 
-Create a struct and use the FIASCO_MODEL macro to make it json-serializable, and simply return it.
-```cpp
+Create a struct and use the `FIASCO_MODEL` macro to make it json-serializable, and simply return it.
+```c++
 struct user_response {
-    std::string username
+    std::string username;
     int age;
 };
 FIASCO_MODEL(user_response, username, age)
@@ -60,20 +75,21 @@ app.get("/users/{user_id}", [](int user_id) {
 
 Similar to response models, you can create request models in the same way. These are passed in the request body and can be mixed with path parameters.
 
-```cpp
+```c++
 struct create_user_request {
     std::string username;
     int age;
 };
 FIASCO_MODEL(create_user_request, username, age)
 
+using fiasco::response::json;
 // first list the path parameters, then the request body model
 app.post("/users/{department_id}", [](int department_id, create_user_request req) {
     // ... = req.username;
     // ...
     
-    return fiasco::response::json(R"({
-        "message": "ok",
+    return json(R"({
+        "message": "ok"
     })");
 });
 ```
@@ -82,7 +98,7 @@ app.post("/users/{department_id}", [](int department_id, create_user_request req
 
 Register a dependency once. It's constructed on first use and cached as a singleton for subsequent calls.
 
-```cpp
+```c++
 app.provide<db>([]() -> db {
     return db::connect("localhost:5432");
 });
@@ -97,6 +113,7 @@ app.get("/users/{id}", [](int id, db& database) -> user_response {
 - Query parameter parsing
 - Middleware pipeline
 - Request logging and hooks
+- Automatic Docs Generation
 - Static file serving
 - HTTPS / TLS support
 - WebSocket support
