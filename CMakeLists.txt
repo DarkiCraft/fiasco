@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(fiasco VERSION 0.1.0 LANGUAGES CXX)
 
-# ── C++17 ────────────────────────────────────────────────────────────────────
+# -- C++17 --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# ── FetchContent Dependencies ────────────────────────────────────────────────
+# -- FetchContent Dependencies ------------------------------------------------
 include(FetchContent)
 
 # nlohmann/json
@@ -43,7 +43,7 @@ FetchContent_MakeAvailable(json Catch2 llhttp)
 unset(BUILD_SHARED_LIBS CACHE)
 unset(BUILD_STATIC_LIBS CACHE)
 
-# ── fiasco (header-only INTERFACE library) ───────────────────────────────────
+# -- fiasco (header-only INTERFACE library) -----------------------------------
 add_library(fiasco INTERFACE)
 
 target_include_directories(fiasco INTERFACE
@@ -55,12 +55,12 @@ target_link_libraries(fiasco INTERFACE
         llhttp_static
 )
 
-# ── Subdirectories ───────────────────────────────────────────────────────────
+# -- Subdirectories -----------------------------------------------------------
 include(CTest)
 enable_testing()
 add_subdirectory(tests)
 
 add_subdirectory(examples)
 
-# ── Installation ─────────────────────────────────────────────────────────────
+# -- Installation -------------------------------------------------------------
 install(DIRECTORY include/ DESTINATION include)
