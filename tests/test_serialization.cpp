@@ -3,7 +3,7 @@
 #include "fiasco/http/request.hpp"
 #include "fiasco/serialization/model.hpp"
 
-// ── Test model ──────────────────────────────────────────────────────────────
+// -- Test model --------------------------------------------------------------
 
 struct test_user {
   std::string username;
@@ -19,7 +19,7 @@ struct test_response_model {
 
 FIASCO_MODEL(test_response_model, id, status)
 
-// ── FIASCO_MODEL tests ─────────────────────────────────────────────────────
+// -- FIASCO_MODEL tests -----------------------------------------------------
 
 TEST_CASE("FIASCO_MODEL generates to_json correctly", "[serialization]") {
   test_user u{"abdurrahman", 21};

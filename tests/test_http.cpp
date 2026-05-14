@@ -5,7 +5,7 @@
 #include "fiasco/http/request.hpp"
 #include "fiasco/http/response.hpp"
 
-// ── request tests ───────────────────────────────────────────────────────────
+// -- request tests -----------------------------------------------------------
 
 TEST_CASE("method_from_string converts correctly", "[http]") {
   REQUIRE(fiasco::string_to_method("GET") == fiasco::http_method::get);
@@ -31,7 +31,7 @@ TEST_CASE("request::header returns value or empty", "[http]") {
   REQUIRE(req.header("X-Missing") == "");
 }
 
-// ── response tests ──────────────────────────────────────────────────────────
+// -- response tests ----------------------------------------------------------
 
 TEST_CASE("response::text creates plain text response", "[http]") {
   auto r = fiasco::response::to_text("hello");
@@ -80,7 +80,7 @@ TEST_CASE("response::serialize produces valid HTTP/1.1", "[http]") {
   REQUIRE(raw.find("\r\n\r\nhi") != std::string::npos);
 }
 
-// ── parser tests ────────────────────────────────────────────────────────────
+// -- parser tests ------------------------------------------------------------
 
 TEST_CASE("llhttp_parser parses a simple GET request", "[parser]") {
   fiasco::llhttp_parser parser;

@@ -47,7 +47,7 @@ TEST_CASE("thread_pool rejects tasks after shutdown", "[thread_pool]") {
   REQUIRE_FALSE(ran.load());
 }
 
-// ── try_submit tests ─────────────────────────────────────────────────────────
+// -- try_submit tests ---------------------------------------------------------
 
 TEST_CASE("try_submit returns true when queue has capacity", "[thread_pool]") {
   fiasco::thread_pool pool(2, /*max_queue=*/10);
@@ -85,7 +85,7 @@ TEST_CASE("try_submit returns false when queue is at capacity",
   release.set_value();
 }
 
-// ── queue_size tests ─────────────────────────────────────────────────────────
+// -- queue_size tests ---------------------------------------------------------
 
 TEST_CASE("queue_size reflects number of pending tasks", "[thread_pool]") {
   // Single worker so new tasks queue up rather than execute immediately.

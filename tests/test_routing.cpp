@@ -6,7 +6,7 @@
 #include "fiasco/routing/function_traits.hpp"
 #include "fiasco/routing/router.hpp"
 
-// ── Test models ──────────────────────────────────────────────────────────────
+// -- Test models --------------------------------------------------------------
 
 struct test_body {
   std::string name;
@@ -22,7 +22,7 @@ struct test_response {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(test_response, echo, number)
 
-// ── Test services (for DI) ───────────────────────────────────────────────────
+// -- Test services (for DI) ---------------------------------------------------
 
 struct counter_service {
   int count = 0;
@@ -34,7 +34,7 @@ struct greeter_service {
   std::string greet(const std::string& name) { return prefix + name; }
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// -- Helpers ------------------------------------------------------------------
 
 static fiasco::request make_request(fiasco::http_method method,
                                     const std::string& path,
@@ -46,7 +46,7 @@ static fiasco::request make_request(fiasco::http_method method,
   return req;
 }
 
-// ── router: static routes ────────────────────────────────────────────────────
+// -- router: static routes ----------------------------------------------------
 
 TEST_CASE("router matches static GET route", "[router]") {
   fiasco::router r;
@@ -84,7 +84,7 @@ TEST_CASE("router::any_method_matches detects 405 case", "[router]") {
   REQUIRE_FALSE(r.any_method_matches("/nope"));
 }
 
-// ── router: path parameters ──────────────────────────────────────────────────
+// -- router: path parameters --------------------------------------------------
 
 TEST_CASE("router extracts single path param", "[router]") {
   fiasco::router r;
@@ -138,7 +138,7 @@ TEST_CASE("router does not match wrong segment count", "[router]") {
   REQUIRE_FALSE(r.match(fiasco::http_method::get, "/users").matched);
 }
 
-// ── function_traits: raw request passthrough ─────────────────────────────────
+// -- function_traits: raw request passthrough ---------------------------------
 
 TEST_CASE("make_handler passes raw request through", "[function_traits]") {
   fiasco::di_container di;
@@ -153,7 +153,7 @@ TEST_CASE("make_handler passes raw request through", "[function_traits]") {
   REQUIRE(res.body == "/hello");
 }
 
-// ── function_traits: path param injection ────────────────────────────────────
+// -- function_traits: path param injection ------------------------------------
 
 TEST_CASE("make_handler injects single int path param", "[function_traits]") {
   fiasco::di_container di;
@@ -201,7 +201,7 @@ TEST_CASE("make_handler injects string path param", "[function_traits]") {
   REQUIRE(h(req).body == "abdurrahman");
 }
 
-// ── function_traits: body deserialization ────────────────────────────────────
+// -- function_traits: body deserialization ------------------------------------
 
 TEST_CASE("make_handler deserializes JSON body into model",
           "[function_traits]") {
@@ -241,7 +241,7 @@ TEST_CASE("make_handler throws on empty body when model expected",
   REQUIRE_THROWS(h(make_request(fiasco::http_method::post, "/", "")));
 }
 
-// ── function_traits: return serialization ────────────────────────────────────
+// -- function_traits: return serialization ------------------------------------
 
 TEST_CASE("make_handler serializes FIASCO_MODEL return to JSON",
           "[function_traits]") {
@@ -271,7 +271,7 @@ TEST_CASE("make_handler passes fiasco::response return through unchanged",
   REQUIRE(res.headers.at("Content-Type") == "text/plain");
 }
 
-// ── function_traits: mixed signatures ────────────────────────────────────────
+// -- function_traits: mixed signatures ----------------------------------------
 
 TEST_CASE("make_handler handles path param + body together",
           "[function_traits]") {
@@ -291,7 +291,7 @@ TEST_CASE("make_handler handles path param + body together",
   REQUIRE(j["number"] == 15);
 }
 
-// ── DI container: basic resolution ───────────────────────────────────────────
+// -- DI container: basic resolution -------------------------------------------
 
 TEST_CASE("di_container resolves registered type", "[di]") {
   fiasco::di_container di;
@@ -325,7 +325,7 @@ TEST_CASE("di_container::has returns correct availability", "[di]") {
   REQUIRE(di.has<counter_service>());
 }
 
-// ── DI: injection via make_handler ───────────────────────────────────────────
+// -- DI: injection via make_handler -------------------------------------------
 
 TEST_CASE("make_handler injects DI service by reference", "[di]") {
   fiasco::di_container di;
