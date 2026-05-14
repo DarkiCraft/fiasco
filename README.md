@@ -98,11 +98,11 @@ Register a dependency once. It's constructed on first use and cached as a single
 
 ```c++
 app.provide<db>([]() -> db {
-    return db::connect("localhost:5432");
+    return db::connect("localhost:5432"); // dummy db
 });
 
 // dependencies are passed at the END of the handler arguments as a reference 
-app.get("/users/{id}", [](int id, db& database) -> user_response {
+app.get("/users/{id}", [](int id, db& database) {
     return database.find(id);
 });
 ```
