@@ -46,7 +46,7 @@ inline bool is_param(const std::string& seg) {
   return seg.size() >= 3 && seg.front() == '{' && seg.back() == '}';
 }
 
-/// @brief Extracts the param name from "{id}" → "id".
+/// @brief Extracts the param name from "{id}" -> "id".
 inline std::string param_name(const std::string& seg) {
   return seg.substr(1, seg.size() - 2);
 }
@@ -176,11 +176,11 @@ class router {
   }
 
  private:
-  // Static routes: method → exact path → handler
+  // Static routes: method -> exact path -> handler
   std::unordered_map<http_method,
       std::unordered_map<std::string, handler_fn>> m_static_routes;
 
-  // Parameterized routes: method → list of entries. Linear scan on miss.
+  // Parameterized routes: method -> list of entries. Linear scan on miss.
   std::unordered_map<http_method,
       std::vector<param_route_entry>> m_param_routes;
 };

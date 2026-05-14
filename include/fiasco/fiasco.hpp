@@ -10,7 +10,7 @@
 ///      -> connection::read()      (drain socket, feed parser)
 ///      -> connection::complete()  (check if a full request is ready)
 ///      -> thread_pool::submit()
-///              -> server::dispatch()   (route → handler → response)
+///              -> server::dispatch()   (route -> handler -> response)
 ///              -> connection::write()  (send serialized response)
 ///              -> keep-alive / close
 ///

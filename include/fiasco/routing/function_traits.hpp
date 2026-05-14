@@ -146,7 +146,7 @@ struct has_to_json<T,
 template <typename T>
 constexpr bool has_to_json_v = has_to_json<T>::value;
 
-// -- Path param string → T conversion -----------------------------------------
+// -- Path param string -> T conversion -----------------------------------------
 
 template <typename T>
 T convert_path_param(const std::string& s) {
@@ -168,7 +168,7 @@ T convert_path_param(const std::string& s) {
   }
 }
 
-// -- Return value → response serialization -----------------------------------
+// -- Return value -> response serialization -----------------------------------
 
 template <typename T>
 response serialize_return(T&& val) {

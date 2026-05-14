@@ -179,16 +179,16 @@ enum class drain_result {
 /// @brief Drains a non-blocking socket, feeding every chunk to feed_fn.
 ///
 /// Reads in a tight loop until:
-///   - EAGAIN / EWOULDBLOCK  → returns drain_result::drained
-///   - n == 0 (peer FIN)     → returns drain_result::closed
-///   - recv() error          → returns drain_result::io_error
-///   - feed_fn returns false → returns drain_result::feed_stopped
+///   - EAGAIN / EWOULDBLOCK  -> returns drain_result::drained
+///   - n == 0 (peer FIN)     -> returns drain_result::closed
+///   - recv() error          -> returns drain_result::io_error
+///   - feed_fn returns false -> returns drain_result::feed_stopped
 ///
 /// This is the right companion for edge-triggered (EPOLLET) epoll: the
 /// caller must drain until EAGAIN to avoid missing bytes.
 ///
 /// @param fd      A non-blocking client socket fd.
-/// @param feed_fn Callable with signature (const char*, std::size_t) → bool.
+/// @param feed_fn Callable with signature (const char*, std::size_t) -> bool.
 ///                Return false to stop reading early (parse error or done).
 template <typename FeedFn>
 drain_result drain(int fd, FeedFn&& feed_fn) {
