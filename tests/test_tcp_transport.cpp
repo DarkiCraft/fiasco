@@ -6,8 +6,7 @@
 
 #include "fiasco/core/tcp_transport.hpp"
 
-// -- Helpers
-// -------------------------------------------------------------------
+// -- Helpers -----------------------------------------------------------------
 
 /// Opens a connected, non-blocking socket pair. [0] = writer, [1] = reader.
 static std::pair<int, int> make_socket_pair() {
@@ -18,8 +17,7 @@ static std::pair<int, int> make_socket_pair() {
   return {fds[0], fds[1]};
 }
 
-// -- socket_fd
-// -----------------------------------------------------------------
+// -- socket_fd ---------------------------------------------------------------
 
 TEST_CASE("socket_fd default-constructs as invalid", "[tcp_transport]") {
   fiasco::detail::socket_fd fd;
@@ -87,8 +85,7 @@ TEST_CASE("socket_fd release gives up ownership", "[tcp_transport]") {
   ::close(released);  // We own it now.
 }
 
-// -- set_nonblocking
-// -----------------------------------------------------------
+// -- set_nonblocking ---------------------------------------------------------
 
 TEST_CASE("set_nonblocking sets O_NONBLOCK on a valid fd", "[tcp_transport]") {
   int raw = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -102,8 +99,7 @@ TEST_CASE("set_nonblocking sets O_NONBLOCK on a valid fd", "[tcp_transport]") {
   ::close(raw);
 }
 
-// -- tcp_transport
-// -------------------------------------------------------------
+// -- tcp_transport -----------------------------------------------------------
 
 TEST_CASE("tcp_transport binds and listens on a port", "[tcp_transport]") {
   // Port 0 lets the OS assign any free port.
@@ -118,8 +114,7 @@ TEST_CASE("tcp_transport accept returns invalid fd when no connections pending",
   REQUIRE_FALSE(client.valid());  // EAGAIN — no pending connection
 }
 
-// -- close_fd
-// ------------------------------------------------------------------
+// -- close_fd ----------------------------------------------------------------
 
 TEST_CASE("close_fd closes a valid fd", "[tcp_transport]") {
   int raw = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -138,8 +133,7 @@ TEST_CASE("close_fd is a no-op for fd < 0", "[tcp_transport]") {
   REQUIRE_NOTHROW(fiasco::detail::close_fd(-42));
 }
 
-// -- send_all
-// ------------------------------------------------------------------
+// -- send_all ----------------------------------------------------------------
 
 TEST_CASE("send_all transmits all bytes", "[tcp_transport]") {
   auto [writer, reader] = make_socket_pair();
@@ -203,8 +197,7 @@ TEST_CASE("send_all returns false on a closed socket", "[tcp_transport]") {
   ::close(writer);
 }
 
-// -- drain
-// ---------------------------------------------------------------------
+// -- drain -------------------------------------------------------------------
 
 TEST_CASE("drain reads all available bytes and returns drained",
           "[tcp_transport]") {
@@ -214,10 +207,11 @@ TEST_CASE("drain reads all available bytes and returns drained",
   ::send(writer, payload.c_str(), payload.size(), 0);
 
   std::string accumulated;
-  auto result = fiasco::detail::drain(reader, [&](const char* buf, std::size_t len) {
-    accumulated.append(buf, len);
-    return true;  // keep reading
-  });
+  auto result =
+      fiasco::detail::drain(reader, [&](const char* buf, std::size_t len) {
+        accumulated.append(buf, len);
+        return true;  // keep reading
+      });
 
   REQUIRE(result == fiasco::detail::drain_result::drained);
   REQUIRE(accumulated == payload);
@@ -233,10 +227,11 @@ TEST_CASE("drain returns closed when peer shuts down the write end",
   ::shutdown(writer, SHUT_WR);  // Send FIN without closing the fd.
 
   std::string accumulated;
-  auto result = fiasco::detail::drain(reader, [&](const char* buf, std::size_t len) {
-    accumulated.append(buf, len);
-    return true;
-  });
+  auto result =
+      fiasco::detail::drain(reader, [&](const char* buf, std::size_t len) {
+        accumulated.append(buf, len);
+        return true;
+      });
 
   REQUIRE(result == fiasco::detail::drain_result::closed);
 
@@ -255,10 +250,11 @@ TEST_CASE(
   ::send(writer, chunk.c_str(), chunk.size(), 0);
 
   int call_count = 0;
-  auto result = fiasco::detail::drain(reader, [&](const char*, std::size_t) -> bool {
-    ++call_count;
-    return false;  // Always stop immediately.
-  });
+  auto result =
+      fiasco::detail::drain(reader, [&](const char*, std::size_t) -> bool {
+        ++call_count;
+        return false;  // Always stop immediately.
+      });
 
   REQUIRE(result == fiasco::detail::drain_result::feed_stopped);
   REQUIRE(call_count >= 1);
@@ -278,10 +274,11 @@ TEST_CASE("drain accumulates bytes across multiple recv calls",
   ::send(writer, payload.c_str(), payload.size(), 0);
 
   std::string accumulated;
-  auto result = fiasco::detail::drain(reader, [&](const char* buf, std::size_t len) {
-    accumulated.append(buf, len);
-    return true;
-  });
+  auto result =
+      fiasco::detail::drain(reader, [&](const char* buf, std::size_t len) {
+        accumulated.append(buf, len);
+        return true;
+      });
 
   REQUIRE(result == fiasco::detail::drain_result::drained);
   REQUIRE(accumulated == payload);
@@ -295,10 +292,11 @@ TEST_CASE("drain on an empty non-blocking socket returns drained immediately",
   auto [writer, reader] = make_socket_pair();
 
   int call_count = 0;
-  auto result = fiasco::detail::drain(reader, [&](const char*, std::size_t) -> bool {
-    ++call_count;
-    return true;
-  });
+  auto result =
+      fiasco::detail::drain(reader, [&](const char*, std::size_t) -> bool {
+        ++call_count;
+        return true;
+      });
 
   REQUIRE(result == fiasco::detail::drain_result::drained);
   REQUIRE(call_count == 0);  // callback never invoked — nothing to read

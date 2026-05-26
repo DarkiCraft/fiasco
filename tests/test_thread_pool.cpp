@@ -3,7 +3,6 @@
 #include <chrono>
 #include <future>
 #include <thread>
-#include <vector>
 
 #include "fiasco/core/thread_pool.hpp"
 
