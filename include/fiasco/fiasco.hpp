@@ -124,9 +124,9 @@ class server {
   ///                        server responds 503 instead of queuing.
   explicit server(unsigned int num_threads = 0, std::size_t max_queue_depth = 0)
       : m_pool(num_threads == 0
-                  ? std::max(std::thread::hardware_concurrency(), 2u)
-                  : num_threads,
-              max_queue_depth) {}
+                   ? std::max(std::thread::hardware_concurrency(), 2u)
+                   : num_threads,
+               max_queue_depth) {}
 
   // -- Route registration --------------------------------------------------
 
@@ -301,16 +301,14 @@ class server {
   // -- Private helpers -------------------------------------------------------
 
   /// @brief Returns the mutex shard for a given file descriptor.
-  std::mutex& shard(int fd) {
-    return m_conns_mtx[fd % 16];
-  }
+  std::mutex& shard(int fd) { return m_conns_mtx[fd % 16]; }
 
   /// @brief Returns (or constructs) the connection for a given fd.
   connection& get_or_create_connection(int fd) {
     std::lock_guard lk(shard(fd));
     auto [it, _] =
         m_conns.emplace(std::piecewise_construct, std::forward_as_tuple(fd),
-                       std::forward_as_tuple(fd));
+                        std::forward_as_tuple(fd));
     return it->second;
   }
 

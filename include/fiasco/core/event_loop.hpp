@@ -33,7 +33,7 @@ class event_loop {
   /// @param max_events Max events to process per epoll_wait call.
   /// @throws std::runtime_error on epoll_create1 failure.
   explicit event_loop(int max_events = 1024)
-      : m_max_events(max_events), m_events(max_events), m_running(false) {
+      : m_max_events(max_events), m_events(max_events) {
     m_epoll_fd = socket_fd(::epoll_create1(0));
     if (!m_epoll_fd.valid()) {
       throw std::runtime_error("epoll_create1 failed: " +
@@ -122,7 +122,7 @@ class event_loop {
   socket_fd m_epoll_fd;
   int m_max_events;
   std::vector<epoll_event> m_events;
-  volatile bool m_running;
+  volatile bool m_running = false;
 };
 
 }  // namespace fiasco

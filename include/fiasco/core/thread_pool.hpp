@@ -19,7 +19,8 @@ namespace fiasco {
 class thread_pool {
  public:
   /// @brief Creates a thread pool with the given number of workers.
-  /// @param num_threads  Number of worker threads (default: hardware concurrency).
+  /// @param num_threads  Number of worker threads (default: hardware
+  /// concurrency).
   /// @param max_queue    Maximum number of pending tasks. 0 means unbounded.
   explicit thread_pool(
       unsigned int num_threads = std::thread::hardware_concurrency(),
@@ -65,8 +66,12 @@ class thread_pool {
   bool try_submit(std::function<void()> task) {
     {
       std::lock_guard lock(m_mutex);
-      if (m_stop) {return false;}
-      if (m_max_queue > 0 && m_tasks.size() >= m_max_queue) {return false;}
+      if (m_stop) {
+        return false;
+      }
+      if (m_max_queue > 0 && m_tasks.size() >= m_max_queue) {
+        return false;
+      }
       m_tasks.push(std::move(task));
     }
     m_cv.notify_one();

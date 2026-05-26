@@ -15,6 +15,7 @@
 #include <string>
 
 namespace fiasco {
+
 /// @brief Sets a file descriptor to non-blocking mode.
 /// @throws std::runtime_error on failure.
 inline void set_nonblocking(int fd) {
@@ -163,16 +164,17 @@ class tcp_transport {
   socket_fd m_server_fd;
 };
 
-// -- Connection I/O helpers ----------------------------------------------------
+// -- Connection I/O helpers
+// ----------------------------------------------------
 //
 // These free functions encapsulate all raw POSIX recv/send/close calls so
 // that higher-level code (fiasco.hpp) stays free of direct syscalls.
 
 /// @brief Result of a drain() call.
 enum class drain_result {
-  drained,       ///< EAGAIN reached — socket empty; more data may arrive later.
-  closed,        ///< Peer sent FIN — connection closed cleanly.
-  io_error,      ///< Unexpected recv() failure (errno set).
+  drained,   ///< EAGAIN reached — socket empty; more data may arrive later.
+  closed,    ///< Peer sent FIN — connection closed cleanly.
+  io_error,  ///< Unexpected recv() failure (errno set).
   feed_stopped,  ///< feed_fn returned false (parse error or request complete).
 };
 
@@ -196,26 +198,34 @@ drain_result drain(int fd, FeedFn&& feed_fn) {
   while (true) {
     ssize_t n = ::recv(fd, buf, sizeof(buf), 0);
     if (n < 0) {
-      if (errno == EAGAIN || errno == EWOULDBLOCK) {return drain_result::drained;}
+      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        return drain_result::drained;
+      }
       return drain_result::io_error;
     }
-    if (n == 0) {return drain_result::closed;}
-    if (!feed_fn(buf, static_cast<std::size_t>(n))) {return drain_result::feed_stopped;}
+    if (n == 0) {
+      return drain_result::closed;
+    }
+    if (!feed_fn(buf, static_cast<std::size_t>(n))) {
+      return drain_result::feed_stopped;
+    }
   }
 }
 
 /// @brief Sends all bytes in data over fd. Retries on EINTR.
 /// @returns true on success, false if send() fails permanently.
 inline bool send_all(int fd, const std::string& data) noexcept {
-  const char* ptr   = data.c_str();
-  std::size_t left  = data.size();
+  const char* ptr = data.c_str();
+  std::size_t left = data.size();
   while (left > 0) {
     ssize_t sent = ::send(fd, ptr, left, MSG_NOSIGNAL);
     if (sent < 0) {
-      if (errno == EINTR) {continue;}
+      if (errno == EINTR) {
+        continue;
+      }
       return false;
     }
-    ptr  += sent;
+    ptr += sent;
     left -= static_cast<std::size_t>(sent);
   }
   return true;
@@ -223,7 +233,9 @@ inline bool send_all(int fd, const std::string& data) noexcept {
 
 /// @brief Closes a file descriptor. No-op if fd < 0.
 inline void close_fd(int fd) noexcept {
-  if (fd >= 0) {::close(fd);}
+  if (fd >= 0) {
+    ::close(fd);
+  }
 }
 
 }  // namespace fiasco

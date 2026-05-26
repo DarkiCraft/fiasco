@@ -120,8 +120,9 @@ TEST_CASE("router prefers static route over parameterized", "[router]") {
     static_hit = true;
     return fiasco::response::to_text("me");
   });
-  r.add_route(fiasco::http_method::get, "/users/{id}",
-              [](fiasco::request) { return fiasco::response::to_text("param"); });
+  r.add_route(fiasco::http_method::get, "/users/{id}", [](fiasco::request) {
+    return fiasco::response::to_text("param");
+  });
 
   auto m = r.match(fiasco::http_method::get, "/users/me");
   REQUIRE(m.matched);
@@ -175,7 +176,7 @@ TEST_CASE("make_handler injects multiple positional path params",
   auto h = fiasco::make_handler(
       [](int id, double salary) -> fiasco::response {
         return fiasco::response::to_text(std::to_string(id) + "," +
-                                      std::to_string(salary));
+                                         std::to_string(salary));
       },
       di);
 
@@ -208,7 +209,8 @@ TEST_CASE("make_handler deserializes JSON body into model",
   fiasco::di_container di;
   auto h = fiasco::make_handler(
       [](test_body b) -> fiasco::response {
-        return fiasco::response::to_text(b.name + ":" + std::to_string(b.value));
+        return fiasco::response::to_text(b.name + ":" +
+                                         std::to_string(b.value));
       },
       di);
 

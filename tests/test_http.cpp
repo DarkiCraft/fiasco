@@ -11,8 +11,7 @@ TEST_CASE("method_from_string converts correctly", "[http]") {
   REQUIRE(fiasco::string_to_method("GET") == fiasco::http_method::get);
   REQUIRE(fiasco::string_to_method("POST") == fiasco::http_method::post);
   REQUIRE(fiasco::string_to_method("DELETE") == fiasco::http_method::del);
-  REQUIRE(fiasco::string_to_method("GARBAGE") ==
-          fiasco::http_method::unknown);
+  REQUIRE(fiasco::string_to_method("GARBAGE") == fiasco::http_method::unknown);
 }
 
 TEST_CASE("method_to_string round-trips", "[http]") {

@@ -14,7 +14,7 @@
 
 /// Helper: get the port a server socket is actually bound to.
 static uint16_t get_bound_port(int server_fd) {
-  struct sockaddr_in addr{};
+  struct sockaddr_in addr {};
   socklen_t len = sizeof(addr);
   ::getsockname(server_fd, reinterpret_cast<struct sockaddr*>(&addr), &len);
   return ntohs(addr.sin_port);
@@ -23,7 +23,7 @@ static uint16_t get_bound_port(int server_fd) {
 /// Helper: connect a blocking client socket to 127.0.0.1:port.
 static int connect_to(uint16_t port) {
   int fd = ::socket(AF_INET, SOCK_STREAM, 0);
-  struct sockaddr_in addr{};
+  struct sockaddr_in addr {};
   addr.sin_family = AF_INET;
   addr.sin_port = htons(port);
   ::inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);

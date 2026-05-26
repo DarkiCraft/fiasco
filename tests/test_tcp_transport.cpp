@@ -1,13 +1,13 @@
-#include <catch2/catch_test_macros.hpp>
-
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <catch2/catch_test_macros.hpp>
 #include <string>
 
 #include "fiasco/core/tcp_transport.hpp"
 
-// -- Helpers -------------------------------------------------------------------
+// -- Helpers
+// -------------------------------------------------------------------
 
 /// Opens a connected, non-blocking socket pair. [0] = writer, [1] = reader.
 static std::pair<int, int> make_socket_pair() {
@@ -18,7 +18,8 @@ static std::pair<int, int> make_socket_pair() {
   return {fds[0], fds[1]};
 }
 
-// -- socket_fd -----------------------------------------------------------------
+// -- socket_fd
+// -----------------------------------------------------------------
 
 TEST_CASE("socket_fd default-constructs as invalid", "[tcp_transport]") {
   fiasco::socket_fd fd;
@@ -86,7 +87,8 @@ TEST_CASE("socket_fd release gives up ownership", "[tcp_transport]") {
   ::close(released);  // We own it now.
 }
 
-// -- set_nonblocking -----------------------------------------------------------
+// -- set_nonblocking
+// -----------------------------------------------------------
 
 TEST_CASE("set_nonblocking sets O_NONBLOCK on a valid fd", "[tcp_transport]") {
   int raw = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -100,7 +102,8 @@ TEST_CASE("set_nonblocking sets O_NONBLOCK on a valid fd", "[tcp_transport]") {
   ::close(raw);
 }
 
-// -- tcp_transport -------------------------------------------------------------
+// -- tcp_transport
+// -------------------------------------------------------------
 
 TEST_CASE("tcp_transport binds and listens on a port", "[tcp_transport]") {
   // Port 0 lets the OS assign any free port.
@@ -115,7 +118,8 @@ TEST_CASE("tcp_transport accept returns invalid fd when no connections pending",
   REQUIRE_FALSE(client.valid());  // EAGAIN — no pending connection
 }
 
-// -- close_fd ------------------------------------------------------------------
+// -- close_fd
+// ------------------------------------------------------------------
 
 TEST_CASE("close_fd closes a valid fd", "[tcp_transport]") {
   int raw = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -134,7 +138,8 @@ TEST_CASE("close_fd is a no-op for fd < 0", "[tcp_transport]") {
   REQUIRE_NOTHROW(fiasco::close_fd(-42));
 }
 
-// -- send_all ------------------------------------------------------------------
+// -- send_all
+// ------------------------------------------------------------------
 
 TEST_CASE("send_all transmits all bytes", "[tcp_transport]") {
   auto [writer, reader] = make_socket_pair();
@@ -198,7 +203,8 @@ TEST_CASE("send_all returns false on a closed socket", "[tcp_transport]") {
   ::close(writer);
 }
 
-// -- drain ---------------------------------------------------------------------
+// -- drain
+// ---------------------------------------------------------------------
 
 TEST_CASE("drain reads all available bytes and returns drained",
           "[tcp_transport]") {
@@ -238,8 +244,9 @@ TEST_CASE("drain returns closed when peer shuts down the write end",
   ::close(reader);
 }
 
-TEST_CASE("drain stops early and returns feed_stopped when callback returns false",
-          "[tcp_transport]") {
+TEST_CASE(
+    "drain stops early and returns feed_stopped when callback returns false",
+    "[tcp_transport]") {
   auto [writer, reader] = make_socket_pair();
 
   // Send two chunks sequentially (they may arrive as one, which is fine —
