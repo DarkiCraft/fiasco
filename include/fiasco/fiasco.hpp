@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 // -- Core --------------------------------------------------------------------
+#include "fiasco/core/connection.hpp"
 #include "fiasco/core/event_loop.hpp"
 #include "fiasco/core/tcp_transport.hpp"
 #include "fiasco/core/thread_pool.hpp"
@@ -39,78 +40,6 @@
 #include "fiasco/routing/router.hpp"
 
 namespace fiasco {
-
-/// @brief Returns the library version string.
-inline const char* version() noexcept { return "0.1.0"; }
-
-// -- Connection ---------------------------------------------------------------
-
-/// @brief Per-connection state: owns the fd, its HTTP parser, and keep-alive
-///        preference.
-///
-/// Lifetime: created on the epoll thread when new data arrives for a client
-/// fd, destroyed after the response is sent (or on error). The server holds
-/// these in an fd-keyed map guarded by a mutex.
-///
-/// All I/O (read / write / close) is delegated to tcp_transport free functions
-/// so that fiasco.hpp stays free of raw POSIX calls.
-struct connection {
-  int fd;
-  detail::llhttp_parser parser;
-  bool keep_alive = true;
-
-  explicit connection(int fd) : fd(fd) {}
-
-  // Non-copyable — parsers are not cheap to copy and fds have identity.
-  connection(const connection&) = delete;
-  connection& operator=(const connection&) = delete;
-
-  connection(connection&&) = default;
-  connection& operator=(connection&&) = default;
-
-  /// @brief Drains the socket and feeds bytes into the HTTP parser.
-  ///
-  /// @returns ReadResult signalling what happened:
-  ///   - complete  : a full request was parsed; call take_request().
-  ///   - partial   : need more data; stay in epoll.
-  ///   - error     : I/O error or bad HTTP; caller should close.
-  enum class ReadResult { complete, partial, error };
-
-  ReadResult read() {
-    bool parse_error = false;
-
-    auto dr = detail::drain(
-        fd, [this, &parse_error](const char* buf, std::size_t len) {
-          if (!parser.feed(buf, len)) {
-            parse_error = true;
-            return false;  // stop — bad HTTP
-          }
-          return !parser.is_complete();  // stop early once a full request is
-                                         // ready
-        });
-
-    if (dr == detail::drain_result::io_error || parse_error)
-      return ReadResult::error;
-    if (dr == detail::drain_result::closed && !parser.is_complete())
-      return ReadResult::error;
-    if (parser.is_complete()) return ReadResult::complete;
-    return ReadResult::partial;
-  }
-
-  /// @brief Moves the completed request out of the parser (resets for reuse).
-  [[nodiscard]] detail::request take_request() { return parser.take_request(); }
-
-  /// @brief Serializes and sends the response over this connection.
-  void write(const detail::response& res) {
-    auto raw = res.serialize();
-    detail::send_all(fd, raw);  // free function from tcp_transport.hpp
-  }
-
-  /// @brief Closes the underlying fd.
-  void close() {
-    detail::close_fd(fd);
-  }  // free function from tcp_transport.hpp
-};
 
 // -- Server -------------------------------------------------------------------
 
@@ -221,16 +150,16 @@ class server {
 
     loop.run(transport, [&](int client_fd, detail::event_loop& lp) {
       // -- Read phase (epoll thread) -------------------------------------
-      connection& conn = get_or_create_connection(client_fd);
+      detail::connection& conn = get_or_create_connection(client_fd);
 
       auto result = conn.read();
 
-      if (result == connection::ReadResult::error) {
+      if (result == detail::connection::ReadResult::error) {
         close_connection(lp, client_fd);
         return;
       }
 
-      if (result == connection::ReadResult::partial) {
+      if (result == detail::connection::ReadResult::partial) {
         return;  // Stay in epoll; wait for more data.
       }
 
@@ -277,7 +206,7 @@ class server {
 
       if (!queued) {
         // Pool queue full — send 503 and close immediately.
-        connection& c = get_connection(client_fd);
+        detail::connection& c = get_connection(client_fd);
         c.write(detail::response::to_error("Server Too Busy", 503));
         close_connection(lp, client_fd);
       }
@@ -298,7 +227,7 @@ class server {
   /// Per-connection state, keyed by fd.
   /// Accessed from both the epoll thread and pool workers — always hold
   /// conns_mtx_ when reading or writing this map.
-  std::unordered_map<int, connection> m_conns;
+  std::unordered_map<int, detail::connection> m_conns;
   mutable std::array<std::mutex, 16> m_conns_mtx;
 
   // -- Private helpers -------------------------------------------------------
@@ -307,7 +236,7 @@ class server {
   std::mutex& shard(int fd) { return m_conns_mtx[fd % 16]; }
 
   /// @brief Returns (or constructs) the connection for a given fd.
-  connection& get_or_create_connection(int fd) {
+  detail::connection& get_or_create_connection(int fd) {
     std::lock_guard lk(shard(fd));
     auto [it, _] =
         m_conns.emplace(std::piecewise_construct, std::forward_as_tuple(fd),
@@ -316,7 +245,7 @@ class server {
   }
 
   /// @brief Returns the connection for a given fd. UB if fd not present.
-  connection& get_connection(int fd) {
+  detail::connection& get_connection(int fd) {
     std::lock_guard lk(shard(fd));
     return m_conns.at(fd);
   }
