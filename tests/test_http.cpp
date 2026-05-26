@@ -8,21 +8,25 @@
 // -- request tests -----------------------------------------------------------
 
 TEST_CASE("method_from_string converts correctly", "[http]") {
-  REQUIRE(fiasco::string_to_method("GET") == fiasco::http_method::get);
-  REQUIRE(fiasco::string_to_method("POST") == fiasco::http_method::post);
-  REQUIRE(fiasco::string_to_method("DELETE") == fiasco::http_method::del);
-  REQUIRE(fiasco::string_to_method("GARBAGE") == fiasco::http_method::unknown);
+  REQUIRE(fiasco::detail::string_to_method("GET") ==
+          fiasco::detail::http_method::get);
+  REQUIRE(fiasco::detail::string_to_method("POST") ==
+          fiasco::detail::http_method::post);
+  REQUIRE(fiasco::detail::string_to_method("DELETE") ==
+          fiasco::detail::http_method::del);
+  REQUIRE(fiasco::detail::string_to_method("GARBAGE") ==
+          fiasco::detail::http_method::unknown);
 }
 
 TEST_CASE("method_to_string round-trips", "[http]") {
-  REQUIRE(std::string(fiasco::method_to_string(fiasco::http_method::get)) ==
-          "GET");
-  REQUIRE(std::string(fiasco::method_to_string(fiasco::http_method::del)) ==
-          "DELETE");
+  REQUIRE(std::string(fiasco::detail::method_to_string(
+              fiasco::detail::http_method::get)) == "GET");
+  REQUIRE(std::string(fiasco::detail::method_to_string(
+              fiasco::detail::http_method::del)) == "DELETE");
 }
 
 TEST_CASE("request::header returns value or empty", "[http]") {
-  fiasco::request req;
+  fiasco::detail::request req;
   req.headers["Content-Type"] = "application/json";
 
   REQUIRE(req.header("Content-Type") == "application/json");
@@ -33,21 +37,21 @@ TEST_CASE("request::header returns value or empty", "[http]") {
 // -- response tests ----------------------------------------------------------
 
 TEST_CASE("response::text creates plain text response", "[http]") {
-  auto r = fiasco::response::to_text("hello");
+  auto r = fiasco::detail::response::to_text("hello");
   REQUIRE(r.status_code == 200);
   REQUIRE(r.body == "hello");
   REQUIRE(r.headers["Content-Type"] == "text/plain");
 }
 
 TEST_CASE("response::json creates JSON response", "[http]") {
-  auto r = fiasco::response::to_json(R"({"ok":true})", 201);
+  auto r = fiasco::detail::response::to_json(R"({"ok":true})", 201);
   REQUIRE(r.status_code == 201);
   REQUIRE(r.body == "{\"ok\":true}");
   REQUIRE(r.headers["Content-Type"] == "application/json");
 }
 
 TEST_CASE("response::error creates error response", "[http]") {
-  auto r = fiasco::response::to_error("not found", 404);
+  auto r = fiasco::detail::response::to_error("not found", 404);
   REQUIRE(r.status_code == 404);
   REQUIRE(r.headers["Content-Type"] == "application/json");
 
@@ -59,7 +63,7 @@ TEST_CASE("response::error creates error response", "[http]") {
 TEST_CASE("response::error escapes special characters in message", "[http]") {
   // The old manual concatenation would have produced broken JSON here.
   const std::string tricky = R"(path "C:\foo\bar" not found)";
-  auto r = fiasco::response::to_error(tricky, 500);
+  auto r = fiasco::detail::response::to_error(tricky, 500);
 
   // Must parse as valid JSON — no throw.
   auto j = nlohmann::json::parse(r.body);
@@ -69,7 +73,7 @@ TEST_CASE("response::error escapes special characters in message", "[http]") {
 }
 
 TEST_CASE("response::serialize produces valid HTTP/1.1", "[http]") {
-  auto r = fiasco::response::to_text("hi");
+  auto r = fiasco::detail::response::to_text("hi");
   auto raw = r.serialize();
 
   REQUIRE(raw.find("HTTP/1.1 200 OK\r\n") == 0);
@@ -94,7 +98,7 @@ TEST_CASE("llhttp_parser parses a simple GET request", "[parser]") {
   REQUIRE(parser.is_complete());
 
   auto req = parser.take_request();
-  REQUIRE(req.method == fiasco::http_method::get);
+  REQUIRE(req.method == fiasco::detail::http_method::get);
   REQUIRE(req.path == "/users");
   REQUIRE(req.query_string == "sort=name");
   REQUIRE(req.url == "/users?sort=name");
@@ -121,7 +125,7 @@ TEST_CASE("llhttp_parser parses a POST request with body", "[parser]") {
   REQUIRE(parser.is_complete());
 
   auto req = parser.take_request();
-  REQUIRE(req.method == fiasco::http_method::post);
+  REQUIRE(req.method == fiasco::detail::http_method::post);
   REQUIRE(req.path == "/data");
   REQUIRE(req.content_type() == "application/json");
   REQUIRE(req.body == body);
@@ -141,9 +145,9 @@ TEST_CASE("llhttp_parser resets for reuse", "[parser]") {
   REQUIRE(parser.is_complete());
   auto req2 = parser.take_request();
 
-  REQUIRE(req1.method == fiasco::http_method::get);
+  REQUIRE(req1.method == fiasco::detail::http_method::get);
   REQUIRE(req1.path == "/");
-  REQUIRE(req2.method == fiasco::http_method::post);
+  REQUIRE(req2.method == fiasco::detail::http_method::post);
   REQUIRE(req2.path == "/x");
   REQUIRE(req2.body == "hi");
 }
