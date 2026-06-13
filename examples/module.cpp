@@ -1,4 +1,5 @@
-#include <fiasco/fiasco.hpp>
+import fiasco.server;
+import fiasco.router;
 
 auto root() { return fiasco::json{{"msg", "root"}}; }
 auto test() { return fiasco::json{{"msg", "test"}}; }
@@ -12,7 +13,6 @@ int main() {
   r.get("/", test);
 
   app.include_router(r);
-  app.include_router(r, "/test");
 
   app.run(8080);
 }

@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.28)
 project(fiasco LANGUAGES CXX)
 
-# -- C++20 --------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 20)
+# -- C++23 --------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 # -- FetchContent Dependencies ------------------------------------------------
 include(FetchContent)
@@ -76,6 +77,7 @@ target_link_libraries(fiasco INTERFACE
 # add_subdirectory(tests)
 
 add_subdirectory(examples)
+add_subdirectory(modules)
 
 # -- Installation -------------------------------------------------------------
 install(DIRECTORY include/ DESTINATION include)
