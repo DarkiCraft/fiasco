@@ -37,7 +37,9 @@ struct session : std::enable_shared_from_this<session> {
         socket.async_read_some(
             asio::buffer(buf),
             asio::bind_executor(strand, [self](asio::error_code ec, std::size_t n) {
-                if (ec) return;
+                if (ec) {
+                    return;
+                }
                 self->parser.feed(self->buf.data(), n);
                 if (self->parser.is_complete()) {
                     self->respond();
@@ -56,13 +58,12 @@ struct session : std::enable_shared_from_this<session> {
         asio::async_write(
             socket,
             asio::buffer(*raw),
-            asio::bind_executor(
-                strand, [self, raw](asio::error_code ec, std::size_t) {
-                    if (!ec) {
-                        self->parser.reset();  // reset parser state for next request
-                        self->read();          // keep reading on same connection
-                    }
-                }));
+            asio::bind_executor(strand, [self, raw](asio::error_code ec, std::size_t) {
+                if (!ec) {
+                    self->parser.reset();  // reset parser state for next request
+                    self->read();          // keep reading on same connection
+                }
+            }));
     }
 };
 

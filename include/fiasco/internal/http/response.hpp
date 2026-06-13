@@ -86,8 +86,12 @@ struct response {
             out += ": ";
             out += val;
             out += "\r\n";
-            if (key == "Content-Length") {has_content_length = true;}
-            if (key == "Connection")     {has_connection = true;}
+            if (key == "Content-Length") {
+                has_content_length = true;
+            }
+            if (key == "Connection") {
+                has_connection = true;
+            }
         }
 
         if (!has_content_length) {
