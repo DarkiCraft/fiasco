@@ -1,6 +1,5 @@
 #pragma once
 
-#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -69,38 +68,40 @@ struct response {
     }
 
     [[nodiscard]] std::string serialize() const {
-        std::ostringstream out;
+        // pre-size to avoid reallocations: status line ~20, headers ~60 each, body
+        std::string out;
+        out.reserve(128 + headers.size() * 64 + body.size());
 
-        // Status line
-        out << "HTTP/1.1 " << status_code << " " << reason_phrase(status_code) << "\r\n";
+        // status line
+        out += "HTTP/1.1 ";
+        out += std::to_string(status_code);
+        out += ' ';
+        out += reason_phrase(status_code);
+        out += "\r\n";
 
-        // Headers
         bool has_content_length = false;
         bool has_connection = false;
         for (const auto& [key, val] : headers) {
-            out << key << ": " << val << "\r\n";
-            if (key == "Content-Length") {
-                has_content_length = true;
-            }
-            if (key == "Connection") {
-                has_connection = true;
-            }
+            out += key;
+            out += ": ";
+            out += val;
+            out += "\r\n";
+            if (key == "Content-Length") {has_content_length = true;}
+            if (key == "Connection")     {has_connection = true;}
         }
 
-        // Auto-add Content-Length if not set
         if (!has_content_length) {
-            out << "Content-Length: " << body.size() << "\r\n";
+            out += "Content-Length: ";
+            out += std::to_string(body.size());
+            out += "\r\n";
         }
-
-        // Auto-add Connection: close for now (keep-alive later)
         if (!has_connection) {
-            out << "Connection: close\r\n";
+            out += "Connection: keep-alive\r\n";
         }
 
-        // End of headers + body
-        out << "\r\n" << body;
-
-        return out.str();
+        out += "\r\n";
+        out += body;
+        return out;
     }
 };
 
