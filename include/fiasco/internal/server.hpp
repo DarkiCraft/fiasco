@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 #include "fiasco/internal/core/tcp_server.hpp"
 #include "fiasco/internal/http/request.hpp"
@@ -42,7 +43,7 @@ class server {
     }
 
     void include_router(router sub, const std::string& prefix = "") {
-        m_router.include_router(sub, prefix);
+        m_router.include_router(std::move(sub), prefix);
     }
 
     void run(uint16_t port = 8080, const std::string& host = "0.0.0.0") {
@@ -67,8 +68,14 @@ class server {
             return response::to_error("Not Found", 404);
         }
 
-        req.path_params = std::move(match.path_params);
-        req.ordered_path_params = std::move(match.ordered_path_params);
+        req.path_params.clear();
+        req.ordered_path_params.clear();
+        req.path_params.reserve(match.path_params.size());
+        req.ordered_path_params.reserve(match.path_params.size());
+        for (const auto& [name, value] : match.path_params) {
+            req.path_params.emplace(std::string(name), std::string(value));
+            req.ordered_path_params.emplace_back(value);
+        }
 
         try {
             return match.handler(std::move(req));

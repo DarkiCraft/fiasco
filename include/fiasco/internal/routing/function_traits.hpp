@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <tuple>
+#include <typeinfo>
 #include <type_traits>
 
 #include <nlohmann/json.hpp>
