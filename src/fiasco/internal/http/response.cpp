@@ -32,7 +32,7 @@ response response::to_json(const std::string& json_body, int status) {
 response response::to_error(const std::string& message, int status) {
     response r;
     r.status_code = status;
-    json_type j;
+    json j;
     j["error"] = message;
     r.body = j.dump() + '\n';
     r.headers["Content-Type"] = "application/json";

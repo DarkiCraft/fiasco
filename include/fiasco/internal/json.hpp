@@ -1,10 +1,10 @@
-
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include "fiasco/internal/json/types.hpp"
+#include "fiasco/internal/json/model.hpp"
 
 namespace fiasco::detail {
 
-using json_type = nlohmann::json;
+using json = json_type;
 
 }

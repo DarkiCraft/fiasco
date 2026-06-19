@@ -6,7 +6,7 @@
 
 namespace fiasco {
 
-using json = detail::json_type;
+using json = detail::json;
 using router = detail::router;
 using server = detail::server;
 

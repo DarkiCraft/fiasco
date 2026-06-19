@@ -6,8 +6,7 @@
 #include <tuple>
 #include <type_traits>
 
-#include <nlohmann/json.hpp>
-
+#include "fiasco/internal/json.hpp"
 #include "fiasco/internal/http/request.hpp"
 #include "fiasco/internal/http/response.hpp"
 #include "fiasco/internal/routing/concepts.hpp"
@@ -41,7 +40,7 @@ template <typename T>
     if constexpr (std::same_as<CleanT, response>) {
         return std::forward<T>(val);
     } else if constexpr (ToJson<CleanT>) {
-        nlohmann::json j = val;
+        json j = val;
         return response::to_json(j.dump());
     } else {
         static_assert(!sizeof(T),
@@ -104,11 +103,11 @@ decltype(auto) resolve_arg(const request& req, size_t& path_idx) {
             throw std::runtime_error("Handler expects a JSON body but request body is empty");
         }
         try {
-            auto j = nlohmann::json::parse(req.body);
+            auto j = json::parse(req.body);
             CleanT val;
             from_json(j, val);
             return val;
-        } catch (const nlohmann::json::exception& e) {
+        } catch (const json::exception& e) {
             throw std::runtime_error(std::string("JSON body parse error: ") + e.what());
         }
     }

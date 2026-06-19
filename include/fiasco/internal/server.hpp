@@ -6,6 +6,7 @@
 #include "fiasco/internal/core/tcp_server.hpp"
 #include "fiasco/internal/http/request.hpp"
 #include "fiasco/internal/http/response.hpp"
+#include "fiasco/internal/json.hpp"
 #include "fiasco/internal/router.hpp"
 
 namespace fiasco::detail {
@@ -79,7 +80,7 @@ class server {
 
         try {
             return match.handler(std::move(req));
-        } catch (const nlohmann::json::exception& e) {
+        } catch (const json::exception& e) {
             return response::to_error(e.what(), 422);
         } catch (const std::exception& e) {
             return response::to_error(e.what(), 500);
