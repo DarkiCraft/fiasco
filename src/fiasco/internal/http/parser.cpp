@@ -78,8 +78,7 @@ struct llhttp_parser::impl {
             if (qpos != std::string::npos) {
                 s->req.path = std::string_view(s->req.url.data(), qpos);
                 s->req.query_string =
-                    std::string_view(s->req.url.data() + qpos + 1,
-                                     s->req.url.size() - qpos - 1);
+                    std::string_view(s->req.url.data() + qpos + 1, s->req.url.size() - qpos - 1);
             } else {
                 s->req.path = std::string_view(s->req.url);
                 s->req.query_string = std::string_view();
@@ -103,7 +102,8 @@ struct llhttp_parser::impl {
     }
 };
 
-llhttp_parser::llhttp_parser() : p_impl(std::make_unique<impl>()) {
+llhttp_parser::llhttp_parser()
+    : p_impl(std::make_unique<impl>()) {
     reset();
 }
 
@@ -127,9 +127,7 @@ bool llhttp_parser::feed(const char* data, size_t len) {
         auto qpos = r.url.find('?');
         if (qpos != std::string::npos) {
             r.path = std::string_view(r.url.data(), qpos);
-            r.query_string =
-                std::string_view(r.url.data() + qpos + 1,
-                                 r.url.size() - qpos - 1);
+            r.query_string = std::string_view(r.url.data() + qpos + 1, r.url.size() - qpos - 1);
         } else {
             r.path = std::string_view(r.url);
             r.query_string = std::string_view();

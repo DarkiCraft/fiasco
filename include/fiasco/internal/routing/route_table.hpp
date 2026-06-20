@@ -22,9 +22,7 @@ struct string_hash {
     size_t operator()(std::string_view s) const noexcept {
         return std::hash<std::string_view>{}(s);
     }
-    size_t operator()(const std::string& s) const noexcept {
-        return std::hash<std::string>{}(s);
-    }
+    size_t operator()(const std::string& s) const noexcept { return std::hash<std::string>{}(s); }
 };
 
 struct match_result {
@@ -61,7 +59,9 @@ class route_table {
         handler_fn handler;
     };
 
-    std::array<std::unordered_map<std::string, handler_fn, string_hash, std::equal_to<>>, num_http_methods> m_static;
+    std::array<std::unordered_map<std::string, handler_fn, string_hash, std::equal_to<>>,
+               num_http_methods>
+        m_static;
     std::array<std::vector<param_route_entry>, num_http_methods> m_param;
 };
 

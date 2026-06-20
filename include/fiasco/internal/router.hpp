@@ -18,9 +18,8 @@ class router {
         : m_prefix(std::move(prefix)) {}
 
     void print_routes() const {
-        m_routes.for_each_route([](http_method, const std::string& path) {
-            std::cout << path << "\n";
-        });
+        m_routes.for_each_route(
+            [](http_method, const std::string& path) { std::cout << path << "\n"; });
         std::cout << "\n\n";
     }
 

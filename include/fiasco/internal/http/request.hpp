@@ -23,8 +23,8 @@ const char* method_to_string(http_method m);
 
 struct request {
     http_method method = http_method::unknown;
-    std::string url;           // owns the URL buffer
-    std::string_view path;     // points into url
+    std::string url;                // owns the URL buffer
+    std::string_view path;          // points into url
     std::string_view query_string;  // points into url
     std::unordered_map<std::string, std::string> headers;
     std::string body;

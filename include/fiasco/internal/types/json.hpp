@@ -48,10 +48,10 @@ class json_type {
     // below ensure a direct ADL-visible overload exists for every common type, so no
     // silent fallback to the implicit-conversion path can occur.
     template <typename T>
-    json_type(const T& val) : json_type() {
-        construct_from_val(&val, [](json_type& j, const void* v) {
-            to_json(j, *static_cast<const T*>(v));
-        });
+    json_type(const T& val)
+        : json_type() {
+        construct_from_val(
+            &val, [](json_type& j, const void* v) { to_json(j, *static_cast<const T*>(v)); });
     }
 
     // -- Assignment -----------------------------------------------------------
@@ -65,25 +65,23 @@ class json_type {
     json_type operator[](std::size_t index) const;
 
     // -- Type introspection ---------------------------------------------------
-    [[nodiscard]] bool is_null()    const noexcept;
+    [[nodiscard]] bool is_null() const noexcept;
     [[nodiscard]] bool is_boolean() const noexcept;
-    [[nodiscard]] bool is_number()  const noexcept;
-    [[nodiscard]] bool is_string()  const noexcept;
-    [[nodiscard]] bool is_object()  const noexcept;
-    [[nodiscard]] bool is_array()   const noexcept;
+    [[nodiscard]] bool is_number() const noexcept;
+    [[nodiscard]] bool is_string() const noexcept;
+    [[nodiscard]] bool is_object() const noexcept;
+    [[nodiscard]] bool is_array() const noexcept;
 
     // -- Query ----------------------------------------------------------------
-    [[nodiscard]] bool         contains(const std::string& key) const noexcept;
-    [[nodiscard]] bool         empty()   const noexcept;
-    [[nodiscard]] std::size_t  size()    const noexcept;
+    [[nodiscard]] bool contains(const std::string& key) const noexcept;
+    [[nodiscard]] bool empty() const noexcept;
+    [[nodiscard]] std::size_t size() const noexcept;
 
     // -- Value extraction with type conversion / default ----------------------
     template <typename T>
     [[nodiscard]] T get() const {
         T val;
-        extract_val(&val, [](const json_type& j, void* v) {
-            from_json(j, *static_cast<T*>(v));
-        });
+        extract_val(&val, [](const json_type& j, void* v) { from_json(j, *static_cast<T*>(v)); });
         return val;
     }
 
@@ -96,7 +94,7 @@ class json_type {
     }
 
     // -- Serialization --------------------------------------------------------
-    static json_type        parse(const std::string& str);
+    static json_type parse(const std::string& str);
     [[nodiscard]] std::string dump(int indent = -1) const;
 
     // -- Mutation -------------------------------------------------------------
@@ -115,15 +113,15 @@ class json_type {
     // -- Bridge accessor for user-defined to_json / from_json -----------------
     // Cast the returned pointer to nlohmann::json_type* in the bridge implementation
     // (i.e. inside the to_json / from_json that FIASCO_MODEL generates).
-    void*       data();
+    void* data();
     const void* data() const;
 
   private:
     using path_segment = std::variant<std::string, std::size_t>;
 
     struct impl;
-    std::shared_ptr<impl>       m_data;
-    std::vector<path_segment>   m_path;
+    std::shared_ptr<impl> m_data;
+    std::vector<path_segment> m_path;
 
     // -- Type-erased bridge helpers -------------------------------------------
     using from_val_fn = void (*)(json_type&, const void*);
@@ -190,9 +188,8 @@ concept JsonOptional = requires(T& t) {
 } && !JsonRange<T>;
 
 template <typename T>
-concept JsonTupleLike = requires(T& t) {
-    std::tuple_size<std::decay_t<T>>::value;
-} && !JsonRange<T>;
+concept JsonTupleLike =
+    requires(T& t) { std::tuple_size<std::decay_t<T>>::value; } && !JsonRange<T>;
 
 // -- Template ADL overload families -------------------------------------------
 // Each family has one to_json + from_json pair (from_json may be omitted when
@@ -219,7 +216,7 @@ void from_json(const json_type& j, T& seq) {
     for (std::size_t i = 0; i < n; ++i) {
         typename T::value_type elem;
         from_json(j[i], elem);
-        if constexpr (requires (T& c, typename T::value_type& v) { c.push_back(v); }) {
+        if constexpr (requires(T& c, typename T::value_type& v) { c.push_back(v); }) {
             seq.push_back(std::move(elem));
         } else {
             seq.insert(seq.end(), std::move(elem));
@@ -273,9 +270,7 @@ void from_json(const json_type& j, T& opt) {
 template <JsonTupleLike T>
 void to_json(json_type& j, const T& tuple) {
     json_type arr = json_type::array({});
-    std::apply([&arr](const auto&... args) {
-        (arr.push_back(json_type(args)), ...);
-    }, tuple);
+    std::apply([&arr](const auto&... args) { (arr.push_back(json_type(args)), ...); }, tuple);
     j = std::move(arr);
 }
 

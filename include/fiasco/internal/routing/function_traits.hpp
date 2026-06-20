@@ -8,9 +8,9 @@
 #include <tuple>
 #include <type_traits>
 
-#include "fiasco/internal/json.hpp"
 #include "fiasco/internal/http/request.hpp"
 #include "fiasco/internal/http/response.hpp"
+#include "fiasco/internal/json.hpp"
 #include "fiasco/internal/routing/concepts.hpp"
 
 namespace fiasco::detail {
@@ -24,22 +24,30 @@ template <Primitive T>
     } else if constexpr (std::same_as<T, int> || std::same_as<T, long>) {
         T val;
         auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
-        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        if (ec != std::errc()) {
+            throw std::runtime_error("bad path param");
+        }
         return val;
     } else if constexpr (std::same_as<T, long long>) {
         long long val;
         auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
-        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        if (ec != std::errc()) {
+            throw std::runtime_error("bad path param");
+        }
         return val;
     } else if constexpr (std::same_as<T, float>) {
         float val;
         auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
-        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        if (ec != std::errc()) {
+            throw std::runtime_error("bad path param");
+        }
         return val;
     } else if constexpr (std::same_as<T, double>) {
         double val;
         auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
-        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        if (ec != std::errc()) {
+            throw std::runtime_error("bad path param");
+        }
         return val;
     } else if constexpr (std::same_as<T, bool>) {
         return s == "true" || s == "1";

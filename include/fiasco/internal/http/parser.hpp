@@ -18,6 +18,7 @@ class llhttp_parser {
     void reset();
 
     ~llhttp_parser();
+
   private:
     struct impl;
     std::unique_ptr<impl> p_impl;

@@ -12,58 +12,72 @@ struct json_type::impl {
 
 // -- Construction ------------------------------------------------------------
 
-json_type::json_type() : m_data(std::make_shared<impl>()) {}
+json_type::json_type()
+    : m_data(std::make_shared<impl>()) {}
 
-json_type::json_type(std::nullptr_t) : m_data(std::make_shared<impl>()) {
+json_type::json_type(std::nullptr_t)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = nullptr;
 }
 
-json_type::json_type(bool b) : m_data(std::make_shared<impl>()) {
+json_type::json_type(bool b)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = b;
 }
 
-json_type::json_type(int i) : m_data(std::make_shared<impl>()) {
+json_type::json_type(int i)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = i;
 }
 
-json_type::json_type(long l) : m_data(std::make_shared<impl>()) {
+json_type::json_type(long l)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = l;
 }
 
-json_type::json_type(long long ll) : m_data(std::make_shared<impl>()) {
+json_type::json_type(long long ll)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = ll;
 }
 
-json_type::json_type(unsigned long ul) : m_data(std::make_shared<impl>()) {
+json_type::json_type(unsigned long ul)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = ul;
 }
 
-json_type::json_type(unsigned long long ull) : m_data(std::make_shared<impl>()) {
+json_type::json_type(unsigned long long ull)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = ull;
 }
 
-json_type::json_type(float f) : m_data(std::make_shared<impl>()) {
+json_type::json_type(float f)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = f;
 }
 
-json_type::json_type(double d) : m_data(std::make_shared<impl>()) {
+json_type::json_type(double d)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = d;
 }
 
-json_type::json_type(const std::string& s) : m_data(std::make_shared<impl>()) {
+json_type::json_type(const std::string& s)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = s;
 }
 
-json_type::json_type(const char* s) : m_data(std::make_shared<impl>()) {
+json_type::json_type(const char* s)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = s;
 }
 
-json_type::json_type(const json_type& other) : m_data(std::make_shared<impl>()) {
+json_type::json_type(const json_type& other)
+    : m_data(std::make_shared<impl>()) {
     m_data->m_json = *static_cast<const nlohmann::json*>(other.data());
 }
 
 json_type::json_type(json_type&& other) noexcept
-    : m_data(std::move(other.m_data)), m_path(std::move(other.m_path)) {
+    : m_data(std::move(other.m_data)),
+      m_path(std::move(other.m_path)) {
     other.m_data = std::make_shared<impl>();
 }
 
