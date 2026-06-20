@@ -39,13 +39,19 @@ template <typename T>
     using CleanT = std::decay_t<T>;
     if constexpr (std::same_as<CleanT, response>) {
         return std::forward<T>(val);
+    } else if constexpr (std::same_as<CleanT, std::string>) {
+        return response::to_text(std::forward<T>(val));
+    } else if constexpr (std::same_as<CleanT, const char*>) {
+        return response::to_text(std::string(val));
+    } else if constexpr (Primitive<CleanT>) {
+        return response::to_text(std::to_string(val));
     } else if constexpr (ToJson<CleanT>) {
         json j = val;
         return response::to_json(j.dump());
     } else {
         static_assert(!sizeof(T),
-                      "Handler return type must be fiasco::response or a "
-                      "FIASCO_MODEL type");
+                      "Handler return type must be a primitive, "
+                      "fiasco::response, or a FIASCO_MODEL type");
     }
 
     return {};  // unreachable
