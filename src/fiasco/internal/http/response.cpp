@@ -7,13 +7,13 @@
 
 namespace fiasco::detail {
 
-response response::to_empty(int status) {
+response response::empty(int status) {
     response r;
     r.status_code = status;
     return r;
 }
 
-response response::to_text(const std::string& body, int status) {
+response response::text(const std::string& body, int status) {
     response r;
     r.status_code = status;
     r.body = body;
@@ -22,7 +22,7 @@ response response::to_text(const std::string& body, int status) {
     return r;
 }
 
-response response::to_json(const std::string& json_body, int status) {
+response response::json(const std::string& json_body, int status) {
     response r;
     r.status_code = status;
     r.body = json_body;
@@ -31,10 +31,19 @@ response response::to_json(const std::string& json_body, int status) {
     return r;
 }
 
-response response::to_error(const std::string& message, int status) {
+response response::html(const std::string& body, int status) {
     response r;
     r.status_code = status;
-    json j;
+    r.body = body;
+    r.body += '\n';
+    r.headers["Content-Type"] = "text/html";
+    return r;
+}
+
+response response::error(const std::string& message, int status) {
+    response r;
+    r.status_code = status;
+    ::fiasco::detail::json j;
     j["error"] = message;
     r.body = j.dump();
     r.body += '\n';

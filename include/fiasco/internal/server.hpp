@@ -64,9 +64,9 @@ class server {
 
         if (!match.matched) {
             if (m_router.any_method_matches(req.path)) {
-                return response::to_error("Method Not Allowed", 405);
+                return response::error("Method Not Allowed", 405);
             }
-            return response::to_error("Not Found", 404);
+            return response::error("Not Found", 404);
         }
 
         req.path_params.clear();
@@ -79,11 +79,11 @@ class server {
         try {
             return match.handler(std::move(req));
         } catch (const json::exception& e) {
-            return response::to_error(e.what(), 422);
+            return response::error(e.what(), 422);
         } catch (const std::exception& e) {
-            return response::to_error(e.what(), 500);
+            return response::error(e.what(), 500);
         } catch (...) {
-            return response::to_error("Internal Server Error", 500);
+            return response::error("Internal Server Error", 500);
         }
     }
 };

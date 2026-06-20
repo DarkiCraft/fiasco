@@ -54,14 +54,14 @@ template <typename T>
     if constexpr (std::same_as<CleanT, response>) {
         return std::forward<T>(val);
     } else if constexpr (std::same_as<CleanT, std::string>) {
-        return response::to_text(std::forward<T>(val));
+        return response::text(std::forward<T>(val));
     } else if constexpr (std::same_as<CleanT, const char*>) {
-        return response::to_text(std::string(val));
+        return response::text(std::string(val));
     } else if constexpr (Primitive<CleanT>) {
-        return response::to_text(std::to_string(val));
+        return response::text(std::to_string(val));
     } else if constexpr (ToJson<CleanT>) {
         json j = val;
-        return response::to_json(j.dump());
+        return response::json(j.dump());
     } else {
         static_assert(!sizeof(T),
                       "Handler return type must be a primitive, "
@@ -137,7 +137,7 @@ template <typename F, typename ArgsTuple, size_t... Is>
 response dispatch_impl(F& fn, const request& req, size_t& path_idx, std::index_sequence<Is...>) {
     if constexpr (std::is_void_v<std::invoke_result_t<F, std::tuple_element_t<Is, ArgsTuple>...>>) {
         fn(resolve_arg<std::tuple_element_t<Is, ArgsTuple>>(req, path_idx)...);
-        return response::to_empty();
+        return response::empty();
     } else {
         return serialize_return(
             fn(resolve_arg<std::tuple_element_t<Is, ArgsTuple>>(req, path_idx)...));

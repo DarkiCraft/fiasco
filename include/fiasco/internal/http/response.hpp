@@ -10,10 +10,11 @@ struct response {
     std::unordered_map<std::string, std::string> headers;
     std::string body;
 
-    static response to_empty(int status = 204);
-    static response to_text(const std::string& body, int status = 200);
-    static response to_json(const std::string& json_body, int status = 200);
-    static response to_error(const std::string& message, int status);
+    static response empty(int status = 204);
+    static response text(const std::string& body, int status = 200);
+    static response json(const std::string& json_body, int status = 200);
+    static response html(const std::string& body, int status = 200);
+    static response error(const std::string& message, int status);
 
     [[nodiscard]] static const char* reason_phrase(int code);
 
