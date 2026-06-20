@@ -1,4 +1,4 @@
-#include "fiasco/internal/json/types.hpp"
+#include "fiasco/internal/types/json.hpp"
 
 #include <nlohmann/json.hpp>
 

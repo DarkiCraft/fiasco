@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.28)
 project(fiasco LANGUAGES CXX)
 
+option(FIASCO_BUILD_MODULES "Build C++ module targets" OFF)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+
+if(FIASCO_BUILD_MODULES)
+  set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+endif()
 
 # == DEPENDENCIES =============================================================
 
@@ -64,6 +69,19 @@ endif()
 
 # == FIASCO ===================================================================
 
+# -- fiasco_types -----------------------------------------
+add_library(fiasco_types STATIC
+    src/fiasco/internal/types/json.cpp
+)
+
+target_include_directories(fiasco_types PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(fiasco_types PRIVATE
+    nlohmann_json::nlohmann_json
+)
+
 # -- fiasco_core ------------------------------------------
 add_library(fiasco_core STATIC
     src/fiasco/internal/core/tcp_server.cpp
@@ -75,19 +93,6 @@ target_include_directories(fiasco_core PUBLIC
 
 target_link_libraries(fiasco_core PUBLIC
     asio
-)
-
-# -- fiasco_json -------------------------------------------
-add_library(fiasco_json STATIC
-    src/fiasco/internal/json/types.cpp
-)
-
-target_include_directories(fiasco_json PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
-target_link_libraries(fiasco_json PRIVATE
-    nlohmann_json::nlohmann_json
 )
 
 # -- fiasco_http ------------------------------------------
@@ -102,7 +107,7 @@ target_include_directories(fiasco_http PUBLIC
 )
 
 target_link_libraries(fiasco_http PUBLIC
-    fiasco_json
+    fiasco_types
     llhttp_static
 )
 
@@ -116,7 +121,7 @@ target_include_directories(fiasco_routing PUBLIC
 )
 
 target_link_libraries(fiasco_routing PUBLIC
-    fiasco_json
+    fiasco_types
     fiasco_http
 )
 
@@ -128,8 +133,8 @@ target_include_directories(fiasco INTERFACE
 )
 
 target_link_libraries(fiasco INTERFACE
+    fiasco_types
     fiasco_core
-    fiasco_json
     fiasco_http
     fiasco_routing
 )
@@ -140,8 +145,6 @@ target_link_libraries(fiasco INTERFACE
 # add_subdirectory(tests)
 
 add_subdirectory(examples)
-
-option(FIASCO_BUILD_MODULES "Build C++ module targets" OFF)
 
 if(FIASCO_BUILD_MODULES)
   add_subdirectory(modules)

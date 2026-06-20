@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fiasco/internal/json/types.hpp"
+#include "fiasco/internal/types/json.hpp"
 
 // -- FOREACH helpers (fixed-limit up to 64 fields) --------------------------
 // A variadic FOR_EACH is impossible in C preprocessing without an explicit

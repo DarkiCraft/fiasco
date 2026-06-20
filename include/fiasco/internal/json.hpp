@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fiasco/internal/json/types.hpp"
-#include "fiasco/internal/json/model.hpp"
+#include "fiasco/internal/types/json.hpp"
+#include "fiasco/internal/types/macros.hpp"
 
 namespace fiasco::detail {
 
