@@ -6,6 +6,6 @@ module;
 export module fiasco.common;
 
 export namespace fiasco {
-    using json = detail::json_type;
+    using json = detail::json;
     using response = detail::response;
 }
