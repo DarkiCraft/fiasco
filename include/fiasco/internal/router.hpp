@@ -54,11 +54,11 @@ class router {
         m_routes.merge_with_prefix(std::move(sub.m_routes), full_prefix);
     }
 
-    match_result match(http_method method, const std::string& path) const {
+    match_result match(http_method method, std::string_view path) const {
         return m_routes.match(method, path);
     }
 
-    bool any_method_matches(const std::string& path) const {
+    bool any_method_matches(std::string_view path) const {
         return m_routes.any_method_matches(path);
     }
 

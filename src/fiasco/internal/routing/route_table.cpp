@@ -41,7 +41,7 @@ void route_table::add(http_method method, const std::string& pattern, handler_fn
     m_param[method_index(method)].push_back(std::move(entry));
 }
 
-match_result route_table::match(http_method method, const std::string& path) const {
+match_result route_table::match(http_method method, std::string_view path) const {
     auto& static_routes = m_static[method_index(method)];
     auto static_hit = static_routes.find(path);
     if (static_hit != static_routes.end()) {
@@ -87,7 +87,7 @@ match_result route_table::match(http_method method, const std::string& path) con
     return {false};
 }
 
-bool route_table::any_method_matches(const std::string& path) const {
+bool route_table::any_method_matches(std::string_view path) const {
     for (size_t mi = 0; mi < num_http_methods; ++mi) {
         if (m_static[mi].count(path)) {
             return true;

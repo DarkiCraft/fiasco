@@ -1,8 +1,10 @@
 #pragma once
 
+#include <charconv>
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 
@@ -16,17 +18,29 @@ namespace fiasco::detail {
 using handler_fn = std::function<response(request)>;
 
 template <Primitive T>
-[[nodiscard]] T convert_path_param(const std::string& s) {
+[[nodiscard]] T convert_path_param(std::string_view s) {
     if constexpr (std::same_as<T, std::string>) {
-        return s;
+        return std::string(s);
     } else if constexpr (std::same_as<T, int> || std::same_as<T, long>) {
-        return static_cast<T>(std::stol(s));
+        T val;
+        auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        return val;
     } else if constexpr (std::same_as<T, long long>) {
-        return std::stoll(s);
+        long long val;
+        auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        return val;
     } else if constexpr (std::same_as<T, float>) {
-        return std::stof(s);
+        float val;
+        auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        return val;
     } else if constexpr (std::same_as<T, double>) {
-        return std::stod(s);
+        double val;
+        auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+        if (ec != std::errc()) throw std::runtime_error("bad path param");
+        return val;
     } else if constexpr (std::same_as<T, bool>) {
         return s == "true" || s == "1";
     }

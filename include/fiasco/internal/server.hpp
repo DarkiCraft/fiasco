@@ -71,11 +71,9 @@ class server {
 
         req.path_params.clear();
         req.ordered_path_params.clear();
-        req.path_params.reserve(match.path_params.size());
-        req.ordered_path_params.reserve(match.path_params.size());
         for (const auto& [name, value] : match.path_params) {
-            req.path_params.emplace(std::string(name), std::string(value));
-            req.ordered_path_params.emplace_back(value);
+            req.path_params.emplace(name, value);
+            req.ordered_path_params.push_back(value);
         }
 
         try {

@@ -16,7 +16,8 @@ response response::to_empty(int status) {
 response response::to_text(const std::string& body, int status) {
     response r;
     r.status_code = status;
-    r.body = body + '\n';
+    r.body = body;
+    r.body += '\n';
     r.headers["Content-Type"] = "text/plain";
     return r;
 }
@@ -24,7 +25,8 @@ response response::to_text(const std::string& body, int status) {
 response response::to_json(const std::string& json_body, int status) {
     response r;
     r.status_code = status;
-    r.body = json_body + '\n';
+    r.body = json_body;
+    r.body += '\n';
     r.headers["Content-Type"] = "application/json";
     return r;
 }
@@ -34,7 +36,8 @@ response response::to_error(const std::string& message, int status) {
     r.status_code = status;
     json j;
     j["error"] = message;
-    r.body = j.dump() + '\n';
+    r.body = j.dump();
+    r.body += '\n';
     r.headers["Content-Type"] = "application/json";
     return r;
 }

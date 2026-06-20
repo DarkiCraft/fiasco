@@ -70,14 +70,19 @@ struct llhttp_parser::impl {
             s->req.method =
                 string_to_method(llhttp_method_name(static_cast<llhttp_method_t>(p->method)));
 
-            // Parse URL into path + query_string
-            s->req.url = s->url_buf;
-            auto qpos = s->url_buf.find('?');
+            // Steal the allocation first
+            s->req.url = std::move(s->url_buf);
+
+            // Parse URL into path + query_string (views into req.url)
+            auto qpos = s->req.url.find('?');
             if (qpos != std::string::npos) {
-                s->req.path = s->url_buf.substr(0, qpos);
-                s->req.query_string = s->url_buf.substr(qpos + 1);
+                s->req.path = std::string_view(s->req.url.data(), qpos);
+                s->req.query_string =
+                    std::string_view(s->req.url.data() + qpos + 1,
+                                     s->req.url.size() - qpos - 1);
             } else {
-                s->req.path = s->url_buf;
+                s->req.path = std::string_view(s->req.url);
+                s->req.query_string = std::string_view();
             }
 
             s->headers_complete = true;
@@ -117,6 +122,19 @@ bool llhttp_parser::feed(const char* data, size_t len) {
 
 [[nodiscard]] request llhttp_parser::take_request() {
     request r = std::move(p_impl->m_state.req);
+    // Re-anchor path/query_string views into r.url (which now owns the buffer)
+    if (!r.url.empty()) {
+        auto qpos = r.url.find('?');
+        if (qpos != std::string::npos) {
+            r.path = std::string_view(r.url.data(), qpos);
+            r.query_string =
+                std::string_view(r.url.data() + qpos + 1,
+                                 r.url.size() - qpos - 1);
+        } else {
+            r.path = std::string_view(r.url);
+            r.query_string = std::string_view();
+        }
+    }
     reset();
     return r;
 }

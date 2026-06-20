@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -22,17 +23,17 @@ const char* method_to_string(http_method m);
 
 struct request {
     http_method method = http_method::unknown;
-    std::string url;           // Full URL (e.g. "/users/42?sort=name")
-    std::string path;          // Path only (e.g. "/users/42")
-    std::string query_string;  // Query string (e.g. "sort=name")
+    std::string url;           // owns the URL buffer
+    std::string_view path;     // points into url
+    std::string_view query_string;  // points into url
     std::unordered_map<std::string, std::string> headers;
     std::string body;
 
-    // Named path params
-    std::unordered_map<std::string, std::string> path_params;
+    // Named path params (views point into url for values, route table for keys)
+    std::unordered_map<std::string_view, std::string_view> path_params;
 
-    // Positional path param values in URL order
-    std::vector<std::string> ordered_path_params;
+    // Positional path param values in URL order (views point into url)
+    std::vector<std::string_view> ordered_path_params;
 
     [[nodiscard]] std::string header(const std::string& key) const {
         auto it = headers.find(key);

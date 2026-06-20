@@ -17,6 +17,16 @@ inline size_t method_index(http_method m) {
     return static_cast<size_t>(m);
 }
 
+struct string_hash {
+    using is_transparent = void;
+    size_t operator()(std::string_view s) const noexcept {
+        return std::hash<std::string_view>{}(s);
+    }
+    size_t operator()(const std::string& s) const noexcept {
+        return std::hash<std::string>{}(s);
+    }
+};
+
 struct match_result {
     bool matched = false;
     handler_fn handler;
@@ -26,8 +36,8 @@ struct match_result {
 class route_table {
   public:
     void add(http_method method, const std::string& pattern, handler_fn handler);
-    match_result match(http_method method, const std::string& path) const;
-    bool any_method_matches(const std::string& path) const;
+    match_result match(http_method method, std::string_view path) const;
+    bool any_method_matches(std::string_view path) const;
     void merge_with_prefix(route_table&& other, std::string_view prefix);
 
     template <typename F>
@@ -51,7 +61,7 @@ class route_table {
         handler_fn handler;
     };
 
-    std::array<std::unordered_map<std::string, handler_fn>, num_http_methods> m_static;
+    std::array<std::unordered_map<std::string, handler_fn, string_hash, std::equal_to<>>, num_http_methods> m_static;
     std::array<std::vector<param_route_entry>, num_http_methods> m_param;
 };
 
