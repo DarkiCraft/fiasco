@@ -71,9 +71,7 @@ json_type::json_type(const char* s)
 }
 
 json_type::json_type(const json_type& other)
-    : m_data(std::make_shared<impl>()) {
-    m_data->m_json = *static_cast<const nlohmann::json*>(other.data());
-}
+    : m_data(other.m_data), m_path(other.m_path) {}
 
 json_type::json_type(json_type&& other) noexcept
     : m_data(std::move(other.m_data)),
@@ -112,9 +110,9 @@ json_type& json_type::operator=(const json_type& other) {
 
 json_type& json_type::operator=(json_type&& other) noexcept {
     if (this != &other) {
-        m_data = std::move(other.m_data);
-        m_path = std::move(other.m_path);
-        other.m_data = std::make_shared<impl>();
+        auto& self = *static_cast<nlohmann::json*>(data());
+        auto& src = *static_cast<nlohmann::json*>(other.data());
+        self = std::move(src);
     }
     return *this;
 }
