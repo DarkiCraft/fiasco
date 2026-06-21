@@ -65,14 +65,23 @@ struct tcp_server::impl {
     tcp::acceptor m_acceptor;
     asio::executor_work_guard<asio::io_context::executor_type> m_work_guard;
     unsigned int m_threads;
+    asio::signal_set m_signals;
 
     impl(uint16_t port, const std::string& host, request_handler handler, unsigned int num_threads)
         : m_handler(std::move(handler)),
           m_acceptor(m_ioc, tcp::endpoint(asio::ip::make_address(host), port)),
           m_work_guard(asio::make_work_guard(m_ioc)),
           m_threads(num_threads == 0 ? std::max(std::thread::hardware_concurrency(), 2u)
-                                     : num_threads) {
+                                     : num_threads),
+          m_signals(m_ioc, SIGINT, SIGTERM) {
         m_acceptor.set_option(tcp::no_delay(true));
+
+        m_signals.async_wait([this](asio::error_code ec, int) {
+            if (!ec) {
+                m_work_guard.reset();
+                m_ioc.stop();
+            }
+        });
     }
 };
 

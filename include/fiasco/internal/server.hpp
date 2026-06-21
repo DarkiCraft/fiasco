@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -48,16 +49,24 @@ class server {
     }
 
     void run(uint16_t port = 8080, const std::string& host = "0.0.0.0") {
-        tcp_server server(
-            port, host, [this](request req) { return dispatch(std::move(req)); }, m_threads);
-        server.run();
+        m_server = std::make_unique<tcp_server>(
+            port, host,
+            [this](request req) { return dispatch(std::move(req)); },
+            m_threads);
+        m_server->run();
+        m_server.reset();
     }
 
-    void stop() {}
+    void stop() {
+        if (m_server) {
+            m_server->stop();
+        }
+    }
 
   private:
     router m_router;
     unsigned int m_threads = 0;
+    std::unique_ptr<tcp_server> m_server;
 
     response dispatch(request req) {
         auto match = m_router.match(req.method, req.path);
