@@ -142,27 +142,27 @@ app.post("/users/{department}", [](int department_id, CreateUserRequest req) {
 Every handler returns a `fiasco::response`. If you return a plain value (string, int, or a `FIASCO_MODEL` type), it's wrapped automatically. For full control, use the factory methods:
 
 ```cpp
-app.get("/text", []() -> fiasco::response {
+app.get("/text", []() {
     return fiasco::response::text("plain text");
 });
 
-app.get("/html", []() -> fiasco::response {
+app.get("/html", []() {
     return fiasco::response::html("<h1>Hello</h1>");
 });
 
-app.get("/json", []() -> fiasco::response {
+app.get("/json", []() {
     return fiasco::response::json(R"({"key":"value"})");
 });
 
-app.get("/redirect", []() -> fiasco::response {
+app.get("/redirect", []() {
     return fiasco::response::redirect("/new-location");
 });
 
-app.get("/error", []() -> fiasco::response {
+app.get("/error", []() {
     return fiasco::response::error("something went wrong", 400);
 });
 
-app.get("/empty", []() -> fiasco::response {
+app.get("/empty", []() {
     return fiasco::response::empty(204);
 });
 ```
