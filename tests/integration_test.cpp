@@ -44,7 +44,9 @@ struct ServerGuard {
     std::thread& t;
     ~ServerGuard() {
         app.stop();
-        if (t.joinable()) t.join();
+        if (t.joinable()) {
+            t.join();
+        }
     }
 };
 
@@ -61,7 +63,9 @@ static std::string send_and_receive(uint16_t port, const std::string& raw) {
 
     while (response.find("\r\n\r\n") == std::string::npos) {
         size_t n = socket.read_some(asio::buffer(buf), ec);
-        if (ec) break;
+        if (ec) {
+            break;
+        }
         response.append(buf.data(), n);
     }
 
@@ -78,7 +82,9 @@ static std::string send_and_receive(uint16_t port, const std::string& raw) {
 
     while (response.size() < header_end + 4 + content_length) {
         size_t n = socket.read_some(asio::buffer(buf), ec);
-        if (ec) break;
+        if (ec) {
+            break;
+        }
         response.append(buf.data(), n);
     }
 
@@ -93,7 +99,9 @@ static int extract_status(const std::string& response) {
 
 static std::string extract_body(const std::string& response) {
     auto hd = response.find("\r\n\r\n");
-    if (hd == std::string::npos) return "";
+    if (hd == std::string::npos) {
+        return "";
+    }
     return response.substr(hd + 4);
 }
 
@@ -153,8 +161,8 @@ TEST_CASE("integration 405 method not allowed", "[integration]") {
     wait_for_server(port);
     ServerGuard guard{app, t};
 
-    auto resp = send_and_receive(port,
-        "POST /resource HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
+    auto resp = send_and_receive(
+        port, "POST /resource HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
     REQUIRE(extract_status(resp) == 405);
 }
 
@@ -162,9 +170,7 @@ TEST_CASE("integration invalid JSON body returns 500", "[integration]") {
     // resolve_arg converts json::exception to std::runtime_error,
     // so dispatch's 422 catch is shadowed → 500.
     fiasco::server app;
-    app.post("/sum", [](const fiasco::detail::SumInput&) -> std::string {
-        return "";
-    });
+    app.post("/sum", [](const fiasco::detail::SumInput&) -> std::string { return ""; });
 
     auto port = find_free_port();
     std::thread t([&] { app.run(port, "127.0.0.1"); });
@@ -172,21 +178,19 @@ TEST_CASE("integration invalid JSON body returns 500", "[integration]") {
     ServerGuard guard{app, t};
 
     auto resp = send_and_receive(port,
-        "POST /sum HTTP/1.1\r\n"
-        "Host: localhost\r\n"
-        "Content-Type: application/json\r\n"
-        "Content-Length: 13\r\n"
-        "\r\n"
-        "{invalid json}");
+                                 "POST /sum HTTP/1.1\r\n"
+                                 "Host: localhost\r\n"
+                                 "Content-Type: application/json\r\n"
+                                 "Content-Length: 13\r\n"
+                                 "\r\n"
+                                 "{invalid json}");
     REQUIRE(extract_status(resp) == 500);
     REQUIRE(extract_body(resp).find("JSON body parse error") != std::string::npos);
 }
 
 TEST_CASE("integration 500 internal error from handler", "[integration]") {
     fiasco::server app;
-    app.get("/crash", []() -> std::string {
-        throw std::runtime_error("boom");
-    });
+    app.get("/crash", []() -> std::string { throw std::runtime_error("boom"); });
 
     auto port = find_free_port();
     std::thread t([&] { app.run(port, "127.0.0.1"); });
@@ -199,9 +203,7 @@ TEST_CASE("integration 500 internal error from handler", "[integration]") {
 
 TEST_CASE("integration path parameters", "[integration]") {
     fiasco::server app;
-    app.get("/users/{uid}", [](int uid) -> std::string {
-        return "user:" + std::to_string(uid);
-    });
+    app.get("/users/{uid}", [](int uid) -> std::string { return "user:" + std::to_string(uid); });
 
     auto port = find_free_port();
     std::thread t([&] { app.run(port, "127.0.0.1"); });
@@ -225,21 +227,19 @@ TEST_CASE("integration JSON body deserialization", "[integration]") {
     ServerGuard guard{app, t};
 
     auto resp = send_and_receive(port,
-        "POST /sum HTTP/1.1\r\n"
-        "Host: localhost\r\n"
-        "Content-Type: application/json\r\n"
-        "Content-Length: 15\r\n"
-        "\r\n"
-        R"({"a":10,"b":20})");
+                                 "POST /sum HTTP/1.1\r\n"
+                                 "Host: localhost\r\n"
+                                 "Content-Type: application/json\r\n"
+                                 "Content-Length: 15\r\n"
+                                 "\r\n"
+                                 R"({"a":10,"b":20})");
     REQUIRE(extract_status(resp) == 200);
     REQUIRE(extract_body(resp) == "30\n");
 }
 
 TEST_CASE("integration POST empty body with JSON model returns 500", "[integration]") {
     fiasco::server app;
-    app.post("/sum", [](const fiasco::detail::SumInput&) -> std::string {
-        return "";
-    });
+    app.post("/sum", [](const fiasco::detail::SumInput&) -> std::string { return ""; });
 
     auto port = find_free_port();
     std::thread t([&] { app.run(port, "127.0.0.1"); });
@@ -247,11 +247,11 @@ TEST_CASE("integration POST empty body with JSON model returns 500", "[integrati
     ServerGuard guard{app, t};
 
     auto resp = send_and_receive(port,
-        "POST /sum HTTP/1.1\r\n"
-        "Host: localhost\r\n"
-        "Content-Type: application/json\r\n"
-        "Content-Length: 0\r\n"
-        "\r\n");
+                                 "POST /sum HTTP/1.1\r\n"
+                                 "Host: localhost\r\n"
+                                 "Content-Type: application/json\r\n"
+                                 "Content-Length: 0\r\n"
+                                 "\r\n");
     REQUIRE(extract_status(resp) == 500);
     REQUIRE(extract_body(resp).find("empty") != std::string::npos);
 }

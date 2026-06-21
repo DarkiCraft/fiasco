@@ -8,9 +8,7 @@ using namespace fiasco::detail;
 
 TEST_CASE("router get route match", "[router]") {
     router r;
-    r.get("/hello", [](const request&) -> response {
-        return response::text("world");
-    });
+    r.get("/hello", [](const request&) -> response { return response::text("world"); });
 
     auto result = r.match(http_method::get, "/hello");
     REQUIRE(result.matched);
@@ -23,9 +21,8 @@ TEST_CASE("router get route match", "[router]") {
 
 TEST_CASE("router post route", "[router]") {
     router r;
-    r.post("/data", [](const request&) -> response {
-        return response::json(R"({"status":"ok"})");
-    });
+    r.post("/data",
+           [](const request&) -> response { return response::json(R"({"status":"ok"})"); });
 
     auto result = r.match(http_method::post, "/data");
     REQUIRE(result.matched);
@@ -45,9 +42,7 @@ TEST_CASE("router method isolation", "[router]") {
 
 TEST_CASE("router put route", "[router]") {
     router r;
-    r.put("/item/{id}", [](const std::string& id) -> std::string {
-        return "updated " + id;
-    });
+    r.put("/item/{id}", [](const std::string& id) -> std::string { return "updated " + id; });
 
     auto result = r.match(http_method::put, "/item/99");
     REQUIRE(result.matched);
@@ -55,9 +50,7 @@ TEST_CASE("router put route", "[router]") {
 
 TEST_CASE("router del route", "[router]") {
     router r;
-    r.del("/item/{id}", [](int id) -> std::string {
-        return "deleted " + std::to_string(id);
-    });
+    r.del("/item/{id}", [](int id) -> std::string { return "deleted " + std::to_string(id); });
 
     auto result = r.match(http_method::del, "/item/42");
     REQUIRE(result.matched);
@@ -65,9 +58,7 @@ TEST_CASE("router del route", "[router]") {
 
 TEST_CASE("router patch route", "[router]") {
     router r;
-    r.patch("/item/{id}", [](int id) -> std::string {
-        return "patched " + std::to_string(id);
-    });
+    r.patch("/item/{id}", [](int id) -> std::string { return "patched " + std::to_string(id); });
 
     auto result = r.match(http_method::patch, "/item/7");
     REQUIRE(result.matched);
@@ -75,9 +66,7 @@ TEST_CASE("router patch route", "[router]") {
 
 TEST_CASE("router include_router with prefix", "[router]") {
     router sub;
-    sub.get("/info", [](const request&) -> response {
-        return response::text("sub info");
-    });
+    sub.get("/info", [](const request&) -> response { return response::text("sub info"); });
 
     router main;
     main.include_router(std::move(sub), "/api");
@@ -91,9 +80,7 @@ TEST_CASE("router include_router with prefix", "[router]") {
 
 TEST_CASE("router include_router without prefix", "[router]") {
     router sub;
-    sub.get("/info", [](const request&) -> response {
-        return response::text("no prefix");
-    });
+    sub.get("/info", [](const request&) -> response { return response::text("no prefix"); });
 
     router main;
     main.include_router(std::move(sub));
@@ -104,9 +91,7 @@ TEST_CASE("router include_router without prefix", "[router]") {
 
 TEST_CASE("router include_router with sub-router prefix", "[router]") {
     router sub("/v2");
-    sub.get("/resource", [](const request&) -> response {
-        return response::text("v2 resource");
-    });
+    sub.get("/resource", [](const request&) -> response { return response::text("v2 resource"); });
 
     router main;
     main.include_router(std::move(sub), "/api");
@@ -117,9 +102,7 @@ TEST_CASE("router include_router with sub-router prefix", "[router]") {
 
 TEST_CASE("router any_method_matches", "[router]") {
     router r;
-    r.get("/only-get", [](const request&) -> response {
-        return response::text("");
-    });
+    r.get("/only-get", [](const request&) -> response { return response::text(""); });
 
     REQUIRE(r.any_method_matches("/only-get"));
     REQUIRE_FALSE(r.any_method_matches("/nope"));
@@ -139,9 +122,7 @@ TEST_CASE("router handler with path params via match", "[router]") {
 
 TEST_CASE("router include_router with sub-router own prefix", "[router]") {
     router sub("/v1");
-    sub.get("/info", [](const request&) -> response {
-        return response::text("sub info");
-    });
+    sub.get("/info", [](const request&) -> response { return response::text("sub info"); });
 
     router main;
     main.include_router(std::move(sub));
@@ -152,9 +133,7 @@ TEST_CASE("router include_router with sub-router own prefix", "[router]") {
 
 TEST_CASE("router include_router with explicit prefix", "[router]") {
     router sub;
-    sub.get("/resource", [](const request&) -> response {
-        return response::text("resource");
-    });
+    sub.get("/resource", [](const request&) -> response { return response::text("resource"); });
 
     router main;
     main.include_router(std::move(sub), "/api");

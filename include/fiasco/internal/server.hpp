@@ -50,9 +50,7 @@ class server {
 
     void run(uint16_t port = 8080, const std::string& host = "0.0.0.0") {
         m_server = std::make_unique<tcp_server>(
-            port, host,
-            [this](request req) { return dispatch(std::move(req)); },
-            m_threads);
+            port, host, [this](request req) { return dispatch(std::move(req)); }, m_threads);
         m_server->run();
         m_server.reset();
     }

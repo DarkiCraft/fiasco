@@ -1,13 +1,5 @@
 #pragma once
 
-#include "fiasco/internal/types/json.hpp"
-
-// -- FOREACH helpers (fixed-limit up to 64 fields) --------------------------
-// A variadic FOR_EACH is impossible in C preprocessing without an explicit
-// macro-per-count because self-referential macros are blue-painted during
-// expansion and cannot recurse.  This is the same approach used by both
-// Boost.PP and nlohmann/json internally.
-
 #define FIASCO_DETAIL_CAT(a, b) a##b
 
 #define FIASCO_DETAIL_GET_COUNT(_1,  \
@@ -221,21 +213,12 @@
 
 #define FIASCO_DETAIL_FROM_JSON_FIELD(field) ::fiasco::detail::from_json_field(j, #field, v.field);
 
-/// Generates non-intrusive to_json / from_json for a struct using the
-/// PIMPL json class (no nlohmann headers exposed).
-///
-/// Usage:
-///   struct user { std::string name; int age; };
-///   FIASCO_MODEL(user, name, age)
-///
-/// This generates:
-///   void to_json(fiasco::detail::json&, const user&);
-///   void from_json(const fiasco::detail::json&, user&);
-#define FIASCO_MODEL(Type, ...)                                               \
-    inline void to_json(::fiasco::detail::json& j, const Type& v) {           \
-        j = ::fiasco::detail::json::object();                                  \
-        FIASCO_FOREACH(FIASCO_DETAIL_TO_JSON_FIELD, __VA_ARGS__)              \
-    }                                                                         \
-    inline void from_json(const ::fiasco::detail::json& j, Type& v) {         \
-        FIASCO_FOREACH(FIASCO_DETAIL_FROM_JSON_FIELD, __VA_ARGS__)            \
+/// Generates non-intrusive to_json / from_json for a struct
+#define FIASCO_MODEL(Type, ...)                                       \
+    inline void to_json(::fiasco::detail::json& j, const Type& v) {   \
+        j = ::fiasco::detail::json::object();                         \
+        FIASCO_FOREACH(FIASCO_DETAIL_TO_JSON_FIELD, __VA_ARGS__)      \
+    }                                                                 \
+    inline void from_json(const ::fiasco::detail::json& j, Type& v) { \
+        FIASCO_FOREACH(FIASCO_DETAIL_FROM_JSON_FIELD, __VA_ARGS__)    \
     }

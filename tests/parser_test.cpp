@@ -42,8 +42,7 @@ TEST_CASE("parser GET path", "[parser]") {
 // ============================================================
 
 TEST_CASE("parser GET with query string", "[parser]") {
-    auto req =
-        parse_raw("GET /search?q=hello&page=1 HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    auto req = parse_raw("GET /search?q=hello&page=1 HTTP/1.1\r\nHost: localhost\r\n\r\n");
     REQUIRE(req.method == http_method::get);
     REQUIRE(req.path == "/search");
     REQUIRE(req.query_string == "q=hello&page=1");
@@ -96,8 +95,7 @@ TEST_CASE("parser multiple headers", "[parser]") {
 // ============================================================
 
 TEST_CASE("parser PUT request", "[parser]") {
-    auto req =
-        parse_raw("PUT /update HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
+    auto req = parse_raw("PUT /update HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
     REQUIRE(req.method == http_method::put);
 }
 

@@ -1,7 +1,7 @@
 #include <fiasco/fiasco.hpp>
 
 int main() {
-    fiasco::server app;
+    fiasco::server app(6);
 
     app.get("/", []() { return "Hello, World!"; });
 

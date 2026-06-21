@@ -65,8 +65,7 @@ TEST_CASE("route_table single path param", "[route_table]") {
 
 TEST_CASE("route_table multiple path params", "[route_table]") {
     route_table table;
-    table.add(http_method::get, "/users/{uid}/posts/{pid}",
-              make_dummy_response(200, ""));
+    table.add(http_method::get, "/users/{uid}/posts/{pid}", make_dummy_response(200, ""));
 
     auto result = table.match(http_method::get, "/users/99/posts/5");
     REQUIRE(result.matched);
@@ -91,8 +90,7 @@ TEST_CASE("route_table param route wrong segment count", "[route_table]") {
 
 TEST_CASE("route_table param route static segment mismatch", "[route_table]") {
     route_table table;
-    table.add(http_method::get, "/users/{id}/profile",
-              make_dummy_response(200, ""));
+    table.add(http_method::get, "/users/{id}/profile", make_dummy_response(200, ""));
 
     auto result = table.match(http_method::get, "/users/42/settings");
     REQUIRE_FALSE(result.matched);
@@ -146,8 +144,7 @@ TEST_CASE("route_table any_method_matches across methods", "[route_table]") {
     REQUIRE(table.any_method_matches("/data"));
 }
 
-TEST_CASE("route_table any_method_matches returns false for empty table",
-          "[route_table]") {
+TEST_CASE("route_table any_method_matches returns false for empty table", "[route_table]") {
     route_table table;
     REQUIRE_FALSE(table.any_method_matches("/anything"));
 }

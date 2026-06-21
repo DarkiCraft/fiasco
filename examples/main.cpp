@@ -9,7 +9,6 @@
 #include <vector>
 
 // --- Request Body ------------------------------------------------------------
-
 struct filter_cfg {
     std::optional<int> min_degree;       // exclude graph nodes below this
     std::optional<double> matrix_scale;  // scale all matrix values
@@ -25,7 +24,6 @@ struct request_body {
 FIASCO_MODEL(request_body, label, weights, filters);
 
 // --- Response Models ---------------------------------------------------------
-
 struct vec3 {
     double x, y, z;
 };
@@ -154,7 +152,6 @@ FIASCO_MODEL(response,
              combined_factors);
 
 // --- Helpers -----------------------------------------------------------------
-
 bool chk_prime(int n) {
     if (n < 2) {
         return false;
@@ -186,8 +183,6 @@ std::vector<int> factorize(int n) {
     }
     return f;
 }
-
-// --- Endpoint ----------------------------------------------------------------
 
 int main() {
     fiasco::server app;

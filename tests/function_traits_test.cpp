@@ -1,5 +1,5 @@
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <string>
 
@@ -131,9 +131,8 @@ TEST_CASE("make_handler no-arg returns void", "[function_traits]") {
 }
 
 TEST_CASE("make_handler captures request", "[function_traits]") {
-    auto handler = make_handler([](const request& req) -> std::string {
-        return req.header("X-Test");
-    });
+    auto handler =
+        make_handler([](const request& req) -> std::string { return req.header("X-Test"); });
 
     request req;
     req.headers["X-Test"] = "captured";
@@ -155,9 +154,7 @@ TEST_CASE("make_handler with path params via ordered_path_params", "[function_tr
 }
 
 TEST_CASE("make_handler throws on insufficient path params", "[function_traits]") {
-    auto handler = make_handler([](int id) -> std::string {
-        return std::to_string(id);
-    });
+    auto handler = make_handler([](int id) -> std::string { return std::to_string(id); });
 
     request req;
     // No path params set
@@ -165,9 +162,8 @@ TEST_CASE("make_handler throws on insufficient path params", "[function_traits]"
 }
 
 TEST_CASE("make_handler with body deserialization", "[function_traits]") {
-    auto handler = make_handler([](int value) -> std::string {
-        return "got=" + std::to_string(value);
-    });
+    auto handler =
+        make_handler([](int value) -> std::string { return "got=" + std::to_string(value); });
 
     request req;
     req.body = R"({"value": 99})";
@@ -202,9 +198,7 @@ TEST_CASE("make_handler with function pointer", "[function_traits]") {
 // ============================================================
 
 TEST_CASE("make_handler handler exception propagates", "[function_traits]") {
-    auto handler = make_handler([]() -> std::string {
-        throw std::runtime_error("handler error");
-    });
+    auto handler = make_handler([]() -> std::string { throw std::runtime_error("handler error"); });
 
     request req;
     REQUIRE_THROWS_AS(handler(std::move(req)), std::runtime_error);

@@ -1,5 +1,5 @@
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <optional>
 #include <string>
@@ -112,8 +112,7 @@ struct WithOptional {
 FIASCO_MODEL(WithOptional, id, name, age)
 
 TEST_CASE("FIASCO_MODEL optional fields present", "[macros]") {
-    WithOptional v{1, std::optional<std::string>("Alice"),
-                   std::optional<int>(30)};
+    WithOptional v{1, std::optional<std::string>("Alice"), std::optional<int>(30)};
 
     json_type j;
     to_json(j, v);
@@ -134,8 +133,7 @@ TEST_CASE("FIASCO_MODEL optional fields absent in json", "[macros]") {
     json_type j = json_type::object();
     j["id"] = json_type(42);
 
-    WithOptional v{0, std::optional<std::string>("default"),
-                   std::optional<int>(99)};
+    WithOptional v{0, std::optional<std::string>("default"), std::optional<int>(99)};
     from_json(j, v);
     REQUIRE(v.id == 42);
     REQUIRE_FALSE(v.name.has_value());

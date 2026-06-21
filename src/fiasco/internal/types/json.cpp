@@ -4,13 +4,9 @@
 
 namespace fiasco::detail {
 
-// -- impl --------------------------------------------------------------------
-
 struct json_type::impl {
     nlohmann::json m_json;
 };
-
-// -- Construction ------------------------------------------------------------
 
 json_type::json_type()
     : m_data(std::make_shared<impl>()) {}
@@ -71,7 +67,8 @@ json_type::json_type(const char* s)
 }
 
 json_type::json_type(const json_type& other)
-    : m_data(other.m_data), m_path(other.m_path) {}
+    : m_data(other.m_data),
+      m_path(other.m_path) {}
 
 json_type::json_type(json_type&& other) noexcept
     : m_data(std::move(other.m_data)),
@@ -103,8 +100,6 @@ json_type json_type::array(std::initializer_list<json_type> values) {
     return j;
 }
 
-// -- Assignment --------------------------------------------------------------
-
 json_type& json_type::operator=(const json_type& other) {
     if (this != &other) {
         auto& self = *static_cast<nlohmann::json*>(data());
@@ -122,8 +117,6 @@ json_type& json_type::operator=(json_type&& other) noexcept {
     }
     return *this;
 }
-
-// -- Element access ----------------------------------------------------------
 
 json_type json_type::operator[](const std::string& key) {
     json_type result;
@@ -157,8 +150,6 @@ json_type json_type::operator[](std::size_t index) const {
     return result;
 }
 
-// -- Type introspection ------------------------------------------------------
-
 bool json_type::is_null() const noexcept {
     return static_cast<const nlohmann::json*>(data())->is_null();
 }
@@ -183,8 +174,6 @@ bool json_type::is_array() const noexcept {
     return static_cast<const nlohmann::json*>(data())->is_array();
 }
 
-// -- Query -------------------------------------------------------------------
-
 bool json_type::contains(const std::string& key) const noexcept {
     return static_cast<const nlohmann::json*>(data())->contains(key);
 }
@@ -196,8 +185,6 @@ bool json_type::empty() const noexcept {
 std::size_t json_type::size() const noexcept {
     return static_cast<const nlohmann::json*>(data())->size();
 }
-
-// -- Serialization -----------------------------------------------------------
 
 json_type json_type::parse(const std::string& str) {
     try {
@@ -212,8 +199,6 @@ json_type json_type::parse(const std::string& str) {
 std::string json_type::dump(int indent) const {
     return static_cast<const nlohmann::json*>(data())->dump(indent);
 }
-
-// -- Mutation ----------------------------------------------------------------
 
 void json_type::push_back(json_type value) {
     auto& arr = *static_cast<nlohmann::json*>(data());
@@ -235,8 +220,6 @@ void json_type::clear() {
     static_cast<nlohmann::json*>(data())->clear();
 }
 
-// -- Comparison --------------------------------------------------------------
-
 bool json_type::operator==(const json_type& other) const noexcept {
     return *static_cast<const nlohmann::json*>(data()) ==
            *static_cast<const nlohmann::json*>(other.data());
@@ -246,19 +229,17 @@ bool json_type::operator!=(const json_type& other) const noexcept {
     return !(*this == other);
 }
 
-// -- Object iteration --------------------------------------------------------
-
 std::vector<std::string> json_type::object_keys() const {
     std::vector<std::string> keys;
     const auto& j = *static_cast<const nlohmann::json*>(data());
-    if (!j.is_object()) return keys;
+    if (!j.is_object()) {
+        return keys;
+    }
     for (const auto& [key, value] : j.items()) {
         keys.push_back(key);
     }
     return keys;
 }
-
-// -- Bridge helpers ----------------------------------------------------------
 
 void* json_type::data() {
     nlohmann::json* current = &m_data->m_json;
@@ -291,8 +272,6 @@ void json_type::construct_from_val(const void* val, from_val_fn fn) {
 void json_type::extract_val(void* val, to_val_fn fn) const {
     fn(*this, val);
 }
-
-// -- Primitive from_json ----------------------------------------------------
 
 void from_json(const json_type& j, std::nullptr_t&) {
     static_cast<const nlohmann::json*>(j.data())->get<std::nullptr_t>();
@@ -333,8 +312,6 @@ void from_json(const json_type& j, double& val) {
 void from_json(const json_type& j, std::string& val) {
     val = static_cast<const nlohmann::json*>(j.data())->get<std::string>();
 }
-
-// -- Primitive to_json ------------------------------------------------------
 
 void to_json(json_type& j, std::nullptr_t) {
     *static_cast<nlohmann::json*>(j.data()) = nullptr;
@@ -387,8 +364,6 @@ void to_json(json_type& j, const json_type& val) {
 void from_json(const json_type& j, json_type& val) {
     *static_cast<nlohmann::json*>(val.data()) = *static_cast<const nlohmann::json*>(j.data());
 }
-
-// -- Lifetime ----------------------------------------------------------------
 
 json_type::~json_type() = default;
 
