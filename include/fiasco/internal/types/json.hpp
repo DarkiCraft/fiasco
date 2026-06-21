@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -42,6 +43,7 @@ class json_type {
     json_type(std::initializer_list<json_entry>);
     // Array from values (defined in .cpp where json_entry is complete)
     static json_type array(std::initializer_list<json_type> values);
+    static json_type object();
 
     // From user model / container / optional / etc. via ADL to_json(json_type&, const T&)
     // The template to_json/t_from_json families (Sequence, Map, Optional, TupleLike)
@@ -301,6 +303,30 @@ void from_json_tuple_impl(const json_type& j, T& tuple, std::index_sequence<Is..
 template <JsonTupleLike T>
 void from_json(const json_type& j, T& tuple) {
     from_json_tuple_impl(j, tuple, std::make_index_sequence<std::tuple_size_v<T>>{});
+}
+
+// -- Field-level helpers for FIASCO_MODEL ------------------------------------
+// Called by the macro-generated to_json / from_json to give std::optional
+// fields FastAPI-like treatment: tolerate missing keys on input (leaves
+// them as std::nullopt).
+
+template <typename T>
+void to_json_field(json_type& j, const char* key, const T& field) {
+    j[key] = json_type(field);
+}
+
+template <typename T>
+void from_json_field(const json_type& j, const char* key, std::optional<T>& field) {
+    if (j.contains(key)) {
+        field = j[key].get<std::optional<T>>();
+    } else {
+        field.reset();
+    }
+}
+
+template <typename T>
+void from_json_field(const json_type& j, const char* key, T& field) {
+    field = j[key].get<T>();
 }
 
 }  // namespace fiasco::detail

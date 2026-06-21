@@ -87,6 +87,12 @@ json_type::json_type(std::initializer_list<json_entry> entries)
     }
 }
 
+json_type json_type::object() {
+    json_type j;
+    j.m_data->m_json = nlohmann::json::object();
+    return j;
+}
+
 json_type json_type::array(std::initializer_list<json_type> values) {
     json_type j;
     j.m_data->m_json = nlohmann::json::array();
